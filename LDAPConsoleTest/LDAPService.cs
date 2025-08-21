@@ -65,6 +65,7 @@ namespace LDAPConsoleTest
 
             // 2. Find the user principal to inspect group membership
 
+
             using (var user = UserPrincipal.FindByIdentity(_context, IdentityType.UserPrincipalName, upn))
 
             {
