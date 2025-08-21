@@ -7,11 +7,16 @@ namespace LDAPConsoleTest
         static void Main(string[] args)
         {
             // LDAP settings (for testing, hardcoded)
-            string ldapUrl = "your.ad.domain.com";
-            var userGroups = new[] { "DevUsers", "QAUsers" };
-            var adminGroups = new[] { "Domain Admins", "IT Support" };
+            string ldapUrl = "192.168.20.228";
+            var userGroups = new[] { "Engineering" };
+            var adminGroups = new[] { "Admins", "IT_Support" };
 
-            using var ldap = new LdapService(ldapUrl, userGroups, adminGroups);
+            // Ask user for credentials
+            Console.Write("Username: ");
+            string username = Console.ReadLine();
+            Console.Write("Password: ");
+            string password = ReadPassword();
+            using var ldap = new LdapService(ldapUrl, username, password, userGroups, adminGroups);
 
             // Test Init
             var (valid, error) = ldap.Init();
@@ -22,11 +27,7 @@ namespace LDAPConsoleTest
             }
             Console.WriteLine("Init successful.");
 
-            // Ask user for credentials
-            Console.Write("Username: ");
-            string username = Console.ReadLine();
-            Console.Write("Password: ");
-            string password = ReadPassword();
+
 
             var loginResult = ldap.Login(username, password);
             Console.WriteLine($"Authenticated: {loginResult.IsAuthenticated}");
