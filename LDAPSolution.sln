@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth with LDAP", "..\Auth with LDAP\Auth with LDAP\Auth with LDAP.csproj", "{1C724D96-707F-C656-DF71-DE3B7474C6CE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LDAPLibrary", "LDAPLibrary\LDAPLibrary.csproj", "{5AD1B49A-C9A3-4C46-9D8D-11E9ABF8453B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LDAPConsoleTest", "LDAPConsoleTest\LDAPConsoleTest.csproj", "{348DC57F-FEB8-4EDC-AED5-C0C12A1FBD05}"
@@ -15,16 +13,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{22BDD7A1-D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{1CC1C8D0-20DB-4057-AA62-76C89712AB03}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth with LDAP", "Auth with LDAP\Auth with LDAP\Auth with LDAP.csproj", "{19B38D42-6B35-C374-39B7-1D400494B451}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1C724D96-707F-C656-DF71-DE3B7474C6CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C724D96-707F-C656-DF71-DE3B7474C6CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C724D96-707F-C656-DF71-DE3B7474C6CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C724D96-707F-C656-DF71-DE3B7474C6CE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5AD1B49A-C9A3-4C46-9D8D-11E9ABF8453B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5AD1B49A-C9A3-4C46-9D8D-11E9ABF8453B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AD1B49A-C9A3-4C46-9D8D-11E9ABF8453B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,14 +29,18 @@ Global
 		{348DC57F-FEB8-4EDC-AED5-C0C12A1FBD05}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{348DC57F-FEB8-4EDC-AED5-C0C12A1FBD05}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{348DC57F-FEB8-4EDC-AED5-C0C12A1FBD05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19B38D42-6B35-C374-39B7-1D400494B451}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19B38D42-6B35-C374-39B7-1D400494B451}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19B38D42-6B35-C374-39B7-1D400494B451}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19B38D42-6B35-C374-39B7-1D400494B451}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{1C724D96-707F-C656-DF71-DE3B7474C6CE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{5AD1B49A-C9A3-4C46-9D8D-11E9ABF8453B} = {22BDD7A1-DA53-4299-B7CA-04843FBA34A8}
 		{348DC57F-FEB8-4EDC-AED5-C0C12A1FBD05} = {1CC1C8D0-20DB-4057-AA62-76C89712AB03}
+		{19B38D42-6B35-C374-39B7-1D400494B451} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {274A5CC7-06E8-4B00-B5B7-EDD67B560EC8}
