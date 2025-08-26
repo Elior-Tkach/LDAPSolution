@@ -1,73 +1,115 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
+using System.Linq;
 
-public class Authenticator
+public enum AuthStatus
 {
-    // Define constants for return codes
-    private const int SUCCESS = 0;
-    private const int USER_NOT_FOUND = 1;
-    private const int NO_PERMISSION = 2;
-    private const int LDAP_ERROR = 3;
+    Success = 0,
+    UserNotFound = 1,
+    InvalidCredentials = 2,
+    NoPermission = 3,
+    LdapError = 4
+}
 
-    // Application allowed groups
-    private static readonly HashSet<string> AllowedGroups = new HashSet<string>
+public class AuthResult
+{
+    public AuthStatus Status { get; set; }
+    public List<string> Groups { get; set; } = new List<string>();
+}
+
+public class UserTypeConfig
+{
+    public List<string> ExplicitUsers { get; set; } = new List<string>();
+    public List<string> AllowedGroups { get; set; } = new List<string>();
+}
+
+public class LdapAuthenticator
+{
+    private readonly string _domain;
+
+    public LdapAuthenticator(string domain)
     {
-        "AppAdmins",
-        "AppUsers"
-    };
+        _domain = domain;
+    }
 
     /// <summary>
-    /// Authenticates a user against LDAP and checks group membership.
+    /// Authenticates a user based on explicit user list and group membership for the given user type.
     /// </summary>
     /// <param name="username">User's LDAP username</param>
     /// <param name="password">User's LDAP password</param>
-    /// <param name="userGroups">A list to store user's groups if authentication succeeds</param>
-    /// <returns>0 if success, otherwise error code</returns>
-    public static int AuthenticateUser(string username, string password, ref List<string> userGroups)
+    /// <param name="userTypeConfig">Configuration for the selected user type</param>
+    /// <returns>AuthResult with status and groups</returns>
+    public AuthResult Authenticate(string username, string password, UserTypeConfig userTypeConfig)
     {
+        var result = new AuthResult();
+
         try
         {
-            // Configure the domain context (change domain and container as needed)
-            using (PrincipalContext context = new PrincipalContext(ContextType.Domain, "YOUR_DOMAIN"))
+            using (var context = new PrincipalContext(ContextType.Domain, _domain))
             {
-                // Validate user credentials
-                bool isValid = context.ValidateCredentials(username, password);
-                if (!isValid)
+                // STEP 1: Check explicit user list
+                if (userTypeConfig.ExplicitUsers.Contains(username, StringComparer.OrdinalIgnoreCase))
                 {
-                    return USER_NOT_FOUND;
-                }
-
-                // Get the user principal
-                UserPrincipal user = UserPrincipal.FindByIdentity(context, username);
-                if (user == null)
-                {
-                    return USER_NOT_FOUND;
-                }
-
-                // Fetch groups
-                userGroups = new List<string>();
-                foreach (GroupPrincipal group in user.GetGroups())
-                {
-                    userGroups.Add(group.SamAccountName);
-                }
-
-                // Check for allowed group
-                foreach (string groupName in userGroups)
-                {
-                    if (AllowedGroups.Contains(groupName))
+                    if (context.ValidateCredentials(username, password))
                     {
-                        return SUCCESS;
+                        // Fetch groups since authentication succeeded
+                        result.Groups = GetUserGroups(context, username);
+                        result.Status = AuthStatus.Success;
+                        return result;
+                    }
+                    else
+                    {
+                        result.Status = AuthStatus.InvalidCredentials;
+                        return result;
                     }
                 }
 
-                return NO_PERMISSION; // User authenticated but has no permission
+                // STEP 2: User not in explicit list → authenticate first
+                if (!context.ValidateCredentials(username, password))
+                {
+                    result.Status = AuthStatus.InvalidCredentials;
+                    return result;
+                }
+
+                // Fetch groups
+                result.Groups = GetUserGroups(context, username);
+
+                // Check if any group matches allowed groups for this user type
+                foreach (var group in result.Groups)
+                {
+                    if (userTypeConfig.AllowedGroups.Contains(group, StringComparer.OrdinalIgnoreCase))
+                    {
+                        result.Status = AuthStatus.Success;
+                        return result;
+                    }
+                }
+
+                result.Status = AuthStatus.NoPermission;
+                return result;
             }
         }
         catch (Exception)
         {
-            return LDAP_ERROR; // Some LDAP or connection error occurred
+            result.Status = AuthStatus.LdapError;
+            return result;
         }
+    }
+
+    /// <summary>
+    /// Gets all LDAP groups for the given username.
+    /// </summary>
+    private List<string> GetUserGroups(PrincipalContext context, string username)
+    {
+        var groups = new List<string>();
+        var user = UserPrincipal.FindByIdentity(context, username);
+        if (user != null)
+        {
+            foreach (var group in user.GetGroups())
+            {
+                groups.Add(group.SamAccountName);
+            }
+        }
+        return groups;
     }
 }
