@@ -3,11 +3,50 @@ using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Net.NetworkInformation;
 using System.IO;
+using System.Reflection;
 
 namespace LDAPConsoleTest_4._8
 {
-    internal class LDAP_Functions
-    {   
+    public class LDAP_Functions
+    {
+        private static string GetIniPath()
+        {
+            var dllPath = Assembly.GetExecutingAssembly().Location;
+            var dir = Path.GetDirectoryName(dllPath);
+            return Path.Combine(dir, "LDAP.ini");
+        }
+
+        // Writes server data as the header if not present
+        public static void RecordLdapServerDetails(string host, string username)
+        {
+            string iniPath = GetIniPath();
+            if (!File.Exists(iniPath))
+            {
+                string header = $"# Server: Host={host}, Username={username}, Timestamp={DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}";
+                header += "Name,Type,PermissionType,Timestamp" + Environment.NewLine;
+                File.WriteAllText(iniPath, header);
+            }
+        }
+
+        // Appends a user or group entry
+        public static void RecordLdapEntry(string name, string type, string permissionType)
+        {
+            string iniPath = GetIniPath();
+            string entry = $"{name},{type},{permissionType},{DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}";
+            File.AppendAllText(iniPath, entry);
+        }
+
+        // Deprecated: keep for compatibility, but redirect to new method
+        public static void RecordLdapUserDetails(string userName, string displayName = null, string email = null)
+        {
+            // For users, you can choose to use displayName/email in the name or ignore
+            RecordLdapEntry(userName, "User", "A"); // Default permissionType 'A', adjust as needed
+        }
+
+        public static void RecordLdapGroupDetails(string groupName, string description = null)
+        {
+            RecordLdapEntry(groupName, "Group", "A"); // Default permissionType 'A', adjust as needed
+        }
 
         /// <summary>
         /// Pings the specified server to check its availability.
@@ -40,28 +79,6 @@ namespace LDAPConsoleTest_4._8
                 return false;
             }
         }
-
-        public static void RecordLdapServerDetails(string host, string username)
-        {
-            string iniPath = "LDAP_server.ini";
-            string entry = $"Host={host};Username={username};Timestamp={DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}";
-            File.AppendAllText(iniPath, entry);
-        }
-
-        public static void RecordLdapUserDetails(string userName, string displayName = null, string email = null)
-        {
-            string iniPath = "LDAP_users.ini";
-            string entry = $"UserName={userName};DisplayName={displayName};Email={email};Timestamp={DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}";
-            File.AppendAllText(iniPath, entry);
-        }
-
-        public static void RecordLdapGroupDetails(string groupName, string description = null)
-        {
-            string iniPath = "LDAP_groups.ini";
-            string entry = $"GroupName={groupName};Description={description};Timestamp={DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}";
-            File.AppendAllText(iniPath, entry);
-        }
-
 
         public static List<string> GetAllLdapGroups(string ldapPath, out string errorMessage, string username = null, string password = null)
         {
@@ -124,9 +141,15 @@ namespace LDAPConsoleTest_4._8
 
                     if (result.Properties.Contains("member"))
                     {
+                        // Extract the base LDAP path server part (e.g., LDAP://192.168.20.228)
+                        string serverPath = ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase)
+                            ? ldapPath
+                            : $"LDAP://{ldapPath}";
+
                         foreach (var memberDn in result.Properties["member"])
                         {
-                            using (var memberEntry = new DirectoryEntry($"LDAP://{memberDn}", username, password))
+                            // Append the DN to the server path
+                            using (var memberEntry = new DirectoryEntry($"{serverPath}/{memberDn}", username, password))
                             {
                                 var userAccount = memberEntry.Properties["sAMAccountName"].Value as string;
                                 if (!string.IsNullOrEmpty(userAccount))
@@ -152,6 +175,7 @@ namespace LDAPConsoleTest_4._8
             }
             return users;
         }
+
 
         public static DirectoryEntry GetUserByUserName(string ldapPath, out string errorMessage, string userName, string username = null, string password = null)
         {
