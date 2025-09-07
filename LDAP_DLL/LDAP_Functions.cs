@@ -65,6 +65,8 @@ namespace LDAP_DLL
             {
                 var groups = new List<string>();
                 errorMessage = null;
+                if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
+                    ldapPath = "LDAP://" + ldapPath;
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
@@ -95,6 +97,8 @@ namespace LDAP_DLL
             {
                 var users = new List<string>();
                 errorMessage = null;
+                if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
+                    ldapPath = "LDAP://" + ldapPath;
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
@@ -108,9 +112,7 @@ namespace LDAP_DLL
                     }
                     if (result.Properties.Contains("member"))
                     {
-                        string serverPath = ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase)
-                            ? ldapPath
-                            : $"LDAP://{ldapPath}";
+                        string serverPath = ldapPath;
                         foreach (var memberDn in result.Properties["member"])
                         {
                             using (var memberEntry = new DirectoryEntry($"{serverPath}/{memberDn}", username, password))
@@ -137,6 +139,8 @@ namespace LDAP_DLL
             {
                 var groups = new List<string>();
                 errorMessage = null;
+                if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
+                    ldapPath = "LDAP://" + ldapPath;
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
@@ -188,6 +192,8 @@ namespace LDAP_DLL
             try
             {
                 errorMessage = null;
+                if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
+                    ldapPath = "LDAP://" + ldapPath;
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
@@ -225,6 +231,8 @@ namespace LDAP_DLL
             try
             {
                 errorMessage = null;
+                if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
+                    ldapPath = "LDAP://" + ldapPath;
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {

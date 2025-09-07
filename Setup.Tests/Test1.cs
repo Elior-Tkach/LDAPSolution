@@ -188,7 +188,7 @@ namespace LDAP_DLL.Tests
         public void GetUser_ReturnsResultOrError()
         {
             string error;
-            var result = Setup.GetUser("LDAP://192.168.20.228", out error, "Emily", "Avraham", "Acx2020");
+            var result = Setup.GetUser("AccellixServer", out error, "Emily", "Avraham", "Acx2020");
             TestContext.WriteLine($"GetUser result: {result}, error: {error}");
             Assert.IsTrue(result == null || result is string, "Should return a string or null");
         }
@@ -197,7 +197,7 @@ namespace LDAP_DLL.Tests
         public void GetGroup_ReturnsResultOrError()
         {
             string error;
-            var result = Setup.GetGroup("ldap://dummy", out error, "TestGroup", "user", "pass");
+            var result = Setup.GetGroup("AccellixServer", out error, "IT_Support", "Avraham", "Acx2020");
             TestContext.WriteLine($"GetGroup result: {result}, error: {error}");
             Assert.IsTrue(result == null || result is string, "Should return a string or null");
         }
@@ -206,7 +206,7 @@ namespace LDAP_DLL.Tests
         public void GetAllGroups_ReturnsArrayOrError()
         {
             string error;
-            var result = Setup.GetAllGroups("ldap://dummy", out error, "user", "pass");
+            var result = Setup.GetAllGroups("AccellixServer", out error, "Avraham", "Acx2020");
             TestContext.WriteLine($"GetAllGroups result length: {result?.Length}, error: {error}");
             Assert.IsNotNull(result, "Should return a string array (may be empty)");
             Assert.IsTrue(result is string[], "Should return a string array");
@@ -216,7 +216,7 @@ namespace LDAP_DLL.Tests
         public void GetUsersInGroup_ReturnsArrayOrError()
         {
             string error;
-            var result = Setup.GetUsersInGroup("ldap://dummy", out error, "TestGroup", "user", "pass");
+            var result = Setup.GetUsersInGroup("AccellixServer", out error, "IT_Support", "Avraham", "Acx2020");
             TestContext.WriteLine($"GetUsersInGroup result length: {result?.Length}, error: {error}");
             Assert.IsNotNull(result, "Should return a string array (may be empty)");
             Assert.IsTrue(result is string[], "Should return a string array");
@@ -226,7 +226,7 @@ namespace LDAP_DLL.Tests
         public void TestConnection_ReturnsBoolAndError()
         {
             string error;
-            var result = Setup.TestConnection("192.168.20.228", out error);
+            var result = Setup.TestConnection("AccellixServer", out error);
             TestContext.WriteLine($"TestConnection result: {result}, error: {error}");
             Assert.IsTrue(result == true || result == false, "Should return a bool");
         }
