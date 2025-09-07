@@ -22,7 +22,24 @@ namespace LDAP_DLL
                     var reply = ping.Send(host);
                     if (reply.Status == IPStatus.Success)
                     {
-                        errorMessage = null;
+                        string resolvedHostName = null;
+                        string resolvedIps = null;
+                        try
+                        {
+                            // Try to resolve host name and ALL IPs
+                            var hostEntry = System.Net.Dns.GetHostEntry(host);
+                            resolvedHostName = hostEntry.HostName;
+                            resolvedIps = hostEntry.AddressList.Length > 0
+                                ? string.Join(", ", hostEntry.AddressList.Select(a => a.ToString()))
+                                : "N/A";
+                        }
+                        catch
+                        {
+                            resolvedHostName = "N/A";
+                            resolvedIps = "N/A";
+                        }
+
+                        errorMessage = $"Ping succeeded. IPs: {resolvedIps}, HostName: {resolvedHostName}";
                         return true;
                     }
                     else

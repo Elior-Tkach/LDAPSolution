@@ -20,12 +20,44 @@ namespace LDAP_DLL
         {
             try
             {
+                // Get server details using PingServerSimple
+                string pingInfo;
+                bool pingSuccess = LDAP_Functions.PingServerSimple(host, out pingInfo);
+
+                if (!pingSuccess)
+                {
+                    errorMessage = $"Failed to ping server: {pingInfo}";
+                    return false;
+                }
+
+                // Parse pingInfo for IPs and HostName
+                // Example: "Ping succeeded. IPs: 192.168.1.10, fe80::1, HostName: myserver.domain.com"
+                string ips = "N/A";
+                string hostName = "N/A";
+                var ipIndex = pingInfo.IndexOf("IPs:");
+                var hostIndex = pingInfo.IndexOf("HostName:");
+                if (ipIndex >= 0 && hostIndex > ipIndex)
+                {
+                    ips = pingInfo.Substring(ipIndex + 4, hostIndex - (ipIndex + 4)).Trim(' ', ',');
+                    hostName = pingInfo.Substring(hostIndex + 9).Trim();
+                }
+
                 string iniPath = GetIniPath();
                 if (!File.Exists(iniPath))
                 {
-                    string header = $"# Server: Host={host}, Username={username}, Timestamp={DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}";
-                    header += "Name,Type,PermissionType,Timestamp" + Environment.NewLine;
-                    File.WriteAllText(iniPath, header);
+                    var sb = new System.Text.StringBuilder();
+                    sb.AppendLine("# ======================================================");
+                    sb.AppendLine("# LDAP Configuration File");
+                    sb.AppendLine("# ======================================================");
+                    sb.AppendLine();
+                    sb.AppendLine("# --------- Server Information ---------");
+                    sb.AppendLine($"Server: IPs={ips}, HostMame={hostName}");
+                    sb.AppendLine();
+                    sb.AppendLine("# --------- Access Control List ---------");
+                    sb.AppendLine("# Columns: name,type,permission");
+                    sb.AppendLine("# type: U= user, G= group");
+                    sb.AppendLine("# permission: A = Admin, O = Operator");
+                    File.WriteAllText(iniPath, sb.ToString());
                 }
                 errorMessage = null;
                 return true;
