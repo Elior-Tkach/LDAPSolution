@@ -10,17 +10,54 @@ namespace LDAP_DLL
 {
     internal class Authentication
     {
-        public static bool AuthenticateUser(string ldapPath, string username, string password, out string errorMessage)
+        // Helper to get LDAP path (host) from INI file header
+        private static string GetLdapPathFromIni()
+        {
+            string iniPath = Setup.GetIniPath();
+            if (!File.Exists(iniPath))
+                throw new FileNotFoundException("INI file does not exist.");
+            var lines = File.ReadAllLines(iniPath);
+            foreach (var line in lines)
+            {
+                if (line.StartsWith("# Server: Host="))
+                {
+                    // Example: # Server: Host=localhost, Username=admin, Timestamp=...
+                    var hostPart = line.Split(',')[0];
+                    var hostEq = hostPart.IndexOf("Host=");
+                    if (hostEq >= 0)
+                    {
+                        return hostPart.Substring(hostEq + 5).Trim();
+                    }
+                }
+            }
+            throw new InvalidOperationException("LDAP host not found in INI file header.");
+        }
+
+        public static bool AuthenticateUser(string username, string password, string permissionType, out string errorMessage)
         {
             errorMessage = string.Empty;
             try
             {
+                string ldapPath = GetLdapPathFromIni();
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 {
                     // Force authentication by accessing NativeObject
                     var obj = entry.NativeObject;
                 }
-                return true;
+                // Check user permission
+                if (IsUserRegistered(username, permissionType, out errorMessage))
+                {
+                    return true;
+                }
+                // Check group permission
+                if (IsUserInRegisteredGroup(username, username, password, permissionType, out errorMessage))
+                {
+                    return true;
+                }
+                // If neither, return false
+                if (string.IsNullOrEmpty(errorMessage))
+                    errorMessage = "User does not have the required permission type.";
+                return false;
             }
             catch (Exception ex)
             {
@@ -68,12 +105,12 @@ namespace LDAP_DLL
             }
         }
 
-
-        public static bool IsUserInRegisteredGroup(string ldapPath, string userName, string username, string password, string permissionType, out string errorMessage)
+        public static bool IsUserInRegisteredGroup(string userName, string username, string password, string permissionType, out string errorMessage)
         {
             errorMessage = null;
             try
             {
+                string ldapPath = GetLdapPathFromIni();
                 var userGroups = LDAP_Functions.GetGroupsForUserArray(ldapPath, out errorMessage, userName, username, password);
                 if (userGroups == null || userGroups.Length == 0)
                 {
