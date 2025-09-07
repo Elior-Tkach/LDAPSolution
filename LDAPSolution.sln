@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth with LDAP", "Auth with
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LDAPConsoleTest_4.8", "LDAPConsoleTest_4.8\LDAPConsoleTest_4.8.csproj", "{A1A822FA-8E03-4E80-BC51-B16695E87367}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LDAP_DLL", "LDAP_Functions\LDAP_DLL.csproj", "{84B19F81-1F77-46DD-99F1-C94F2A292388}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LDAP_DLL", "LDAP_DLL\LDAP_DLL.csproj", "{84B19F81-1F77-46DD-99F1-C94F2A292388}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
