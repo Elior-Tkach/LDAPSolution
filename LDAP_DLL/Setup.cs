@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-
+using System.Linq;
 
 namespace LDAP_DLL
 {
@@ -31,7 +31,6 @@ namespace LDAP_DLL
                 }
 
                 // Parse pingInfo for IPs and HostName
-                // Example: "Ping succeeded. IPs: 192.168.1.10, fe80::1, HostName: myserver.domain.com"
                 string ips = "N/A";
                 string hostName = "N/A";
                 var ipIndex = pingInfo.IndexOf("IPs:");
@@ -51,7 +50,7 @@ namespace LDAP_DLL
                     sb.AppendLine("# ======================================================");
                     sb.AppendLine();
                     sb.AppendLine("# --------- Server Information ---------");
-                    sb.AppendLine($"Server: IPs={ips}, HostMame={hostName}");
+                    sb.AppendLine($"Server: IPs={ips}, HostName={hostName}");
                     sb.AppendLine();
                     sb.AppendLine("# --------- Access Control List ---------");
                     sb.AppendLine("# Columns: name,type,permission");
@@ -69,76 +68,45 @@ namespace LDAP_DLL
             }
         }
 
-        // Appends a user or group entry
-        internal static bool RecordLdapUserDetailsSimple(string userName, string displayName, string email, out string errorMessage)
-        {
-            return RecordLdapEntry(userName, "User", "O", out errorMessage); // Default permissionType 'O', adjust as needed
-        }
-
-        internal static bool RecordLdapGroupDetailsSimple(string groupName, string description, out string errorMessage)
-        {
-            return RecordLdapEntry(groupName, "Group", "O", out errorMessage); // Default permissionType 'O', adjust as needed
-        }
-
-        internal static bool RecordLdapEntry(string name, string type, string permissionType, out string errorMessage)
-        {
-            try
-            {
-                string iniPath = GetIniPath();
-                string entry = $"{name},{type},{permissionType},{DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}";
-                File.AppendAllText(iniPath, entry);
-                errorMessage = null;
-                return true;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = ex.Message;
-                return false;
-            }
-        }
-
-        public static bool MarkUserPermission(string userName, string permissionType, out string errorMessage)
-        {
-            return MarkPermission(userName, "User", permissionType, out errorMessage);
-        }
-
-        public static bool MarkGroupPermission(string groupName, string permissionType, out string errorMessage)
-        {
-            return MarkPermission(groupName, "Group", permissionType, out errorMessage);
-        }
-
-        // Helper to update permission type for user or group
-        private static bool MarkPermission(string name, string type, string permissionType, out string errorMessage)
+        // Unified function to save (add or update) a user/group entry
+        public static bool SaveLdapPermission(string name, string type, string permissionType, out string errorMessage)
         {
             try
             {
                 string iniPath = GetIniPath();
                 if (!File.Exists(iniPath))
                 {
-                    errorMessage = "INI file does not exist.";
+                    errorMessage = "INI file does not exist. Run RecordLdapServerDetailsSimple first.";
                     return false;
                 }
-                var lines = File.ReadAllLines(iniPath);
+
+                var lines = File.ReadAllLines(iniPath).ToList();
                 bool found = false;
-                for (int i = 0; i < lines.Length; i++)
+
+                for (int i = 0; i < lines.Count; i++)
                 {
                     var line = lines[i];
-                    if (line.StartsWith("#") || line.StartsWith("Name,")) continue;
+                    if (line.StartsWith("#") || string.IsNullOrWhiteSpace(line)) continue;
+
                     var parts = line.Split(',');
-                    if (parts.Length >= 4 && parts[0] == name && parts[1] == type)
+                    if (parts.Length >= 3 && parts[0] == name && parts[1] == type)
                     {
+                        // Update existing entry
                         parts[2] = permissionType;
                         lines[i] = string.Join(",", parts);
                         found = true;
                         break;
                     }
                 }
+
                 if (!found)
                 {
-                    errorMessage = $"{type} '{name}' not found in INI file.";
-                    return false;
+                    // Append new entry
+                    lines.Add($"{name},{type},{permissionType}");
                 }
+
                 File.WriteAllLines(iniPath, lines);
+
                 errorMessage = null;
                 return true;
             }
@@ -149,6 +117,7 @@ namespace LDAP_DLL
             }
         }
 
+        // LDAP passthrough functions
         public static string GetUser(string ldapPath, out string errorMessage, string userName, string username, string password)
         {
             return LDAP_Functions.GetUserByUserNameSimple(ldapPath, out errorMessage, userName, username, password);
