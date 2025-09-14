@@ -47,11 +47,5 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Setup.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LDAPConsoleTest_4.8\LDAPConsoleTest_4.8.csproj">
-      <Project>{a1a822fa-8e03-4e80-bc51-b16695e87367}</Project>
-      <Name>LDAPConsoleTest_4.8</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
