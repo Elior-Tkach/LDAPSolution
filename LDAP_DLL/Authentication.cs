@@ -8,7 +8,7 @@ using System.IO;
 
 namespace LDAP_DLL
 {
-    internal class Authentication
+    public class Authentication
     {
         // Helper to get LDAP path (host) from INI file header
         private static string GetLdapPathFromIni()
@@ -19,18 +19,17 @@ namespace LDAP_DLL
             var lines = File.ReadAllLines(iniPath);
             foreach (var line in lines)
             {
-                if (line.StartsWith("# Server: Host="))
+                if (line.StartsWith("Server: IPs="))
                 {
-                    // Example: # Server: Host=localhost, Username=admin, Timestamp=...
-                    var hostPart = line.Split(',')[0];
-                    var hostEq = hostPart.IndexOf("Host=");
-                    if (hostEq >= 0)
+                    var IPPart = line.Split(',')[0];
+                    var IPEq = IPPart.IndexOf("IPs=");
+                    if (IPEq >= 0)
                     {
-                        return hostPart.Substring(hostEq + 5).Trim();
+                        return IPPart.Substring(IPEq + 5).Trim();
                     }
                 }
             }
-            throw new InvalidOperationException("LDAP host not found in INI file header.");
+            throw new InvalidOperationException("LDAP IP not found in INI file header.");
         }
 
         public static bool AuthenticateUser(string username, string password, string permissionType, out string errorMessage)
@@ -80,9 +79,9 @@ namespace LDAP_DLL
                 var lines = File.ReadAllLines(iniPath);
                 foreach (var line in lines)
                 {
-                    if (line.StartsWith("#") || line.StartsWith("Name,")) continue;
+                    if (line.StartsWith("#") || line.StartsWith("Server:")) continue;
                     var parts = line.Split(',');
-                    if (parts.Length >= 4 && parts[0] == userName && parts[1] == "User")
+                    if (parts.Length >= 3 && parts[0] == userName && parts[1] == "U")
                     {
                         if (string.Equals(parts[2], expectedPermissionType, StringComparison.OrdinalIgnoreCase))
                         {
@@ -129,9 +128,9 @@ namespace LDAP_DLL
                 {
                     foreach (var line in lines)
                     {
-                        if (line.StartsWith("#") || line.StartsWith("Name,")) continue;
+                        if (line.StartsWith("#") || line.StartsWith("Server:")) continue;
                         var parts = line.Split(',');
-                        if (parts.Length >= 4 && parts[0] == group && parts[1] == "Group")
+                        if (parts.Length >= 3 && parts[0] == group && parts[1] == "G")
                         {
                             if (string.Equals(parts[2], permissionType, StringComparison.OrdinalIgnoreCase))
                             {

@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LDAP_DLL.TEST", "LDAP_DLL.T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Setup.Tests", "Setup.Tests\Setup.Tests.csproj", "{121C2A23-E942-418E-9992-E02D62E8938A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authentication.Test", "Authentication.Test\Authentication.Test.csproj", "{6E68E5DB-30AE-47A2-9A44-57A653E25080}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{121C2A23-E942-418E-9992-E02D62E8938A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{121C2A23-E942-418E-9992-E02D62E8938A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{121C2A23-E942-418E-9992-E02D62E8938A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E68E5DB-30AE-47A2-9A44-57A653E25080}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E68E5DB-30AE-47A2-9A44-57A653E25080}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E68E5DB-30AE-47A2-9A44-57A653E25080}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E68E5DB-30AE-47A2-9A44-57A653E25080}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -41,6 +47,7 @@ Global
 		{19B38D42-6B35-C374-39B7-1D400494B451} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{84B19F81-1F77-46DD-99F1-C94F2A292388} = {22BDD7A1-DA53-4299-B7CA-04843FBA34A8}
 		{121C2A23-E942-418E-9992-E02D62E8938A} = {AE87FD36-24C8-48C9-98EA-CD1C041D58A4}
+		{6E68E5DB-30AE-47A2-9A44-57A653E25080} = {AE87FD36-24C8-48C9-98EA-CD1C041D58A4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {274A5CC7-06E8-4B00-B5B7-EDD67B560EC8}

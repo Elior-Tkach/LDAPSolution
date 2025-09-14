@@ -7,7 +7,7 @@ using LDAP_DLL;
 namespace LDAP_DLL.Tests
 {
     [TestClass]
-    public class SSetupTests
+    public class SetupTests
     {
         public TestContext TestContext { get; set; }
         private string _testDir = string.Empty;
