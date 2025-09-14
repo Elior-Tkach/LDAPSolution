@@ -16,7 +16,7 @@ namespace LDAP_DLL
         }
 
         // Writes server data as the header if not present
-        internal static bool RecordLdapServerDetailsSimple(string host, string username, out string errorMessage)
+        internal static bool RecordLdapServerDetailsSimple(string host, out string errorMessage)
         {
             try
             {
@@ -42,6 +42,7 @@ namespace LDAP_DLL
                 }
 
                 string iniPath = GetIniPath();
+                string newServerLine = $"Server: IPs={ips}, HostName={hostName}";
                 if (!File.Exists(iniPath))
                 {
                     var sb = new System.Text.StringBuilder();
@@ -50,13 +51,40 @@ namespace LDAP_DLL
                     sb.AppendLine("# ======================================================");
                     sb.AppendLine();
                     sb.AppendLine("# --------- Server Information ---------");
-                    sb.AppendLine($"Server: IPs={ips}, HostName={hostName}");
+                    sb.AppendLine(newServerLine);
                     sb.AppendLine();
                     sb.AppendLine("# --------- Access Control List ---------");
                     sb.AppendLine("# Columns: name,type,permission");
                     sb.AppendLine("# type: U= user, G= group");
                     sb.AppendLine("# permission: A = Admin, O = Operator");
                     File.WriteAllText(iniPath, sb.ToString());
+                }
+                else
+                {
+                    var lines = File.ReadAllLines(iniPath).ToList();
+                    for (int i = 0; i < lines.Count; i++)
+                    {
+                        if (lines[i].StartsWith("Server:"))
+                        {
+                            if (lines[i].Trim() == newServerLine)
+                            {
+                                // Details are the same, do nothing
+                                errorMessage = null;
+                                return true;
+                            }
+                            else
+                            {
+                                // Update the line
+                                lines[i] = newServerLine;
+                                File.WriteAllLines(iniPath, lines);
+                                errorMessage = null;
+                                return true;
+                            }
+                        }
+                    }
+                    // If we reach here, "Server:" line was not found, do nothing as per user request
+                    errorMessage = null;
+                    return true;
                 }
                 errorMessage = null;
                 return true;
@@ -68,6 +96,7 @@ namespace LDAP_DLL
             }
         }
 
+
         // Unified function to save (add or update) a user/group entry
         public static bool SaveLdapPermission(string name, string type, string permissionType, out string errorMessage)
         {
@@ -76,7 +105,7 @@ namespace LDAP_DLL
                 string iniPath = GetIniPath();
                 if (!File.Exists(iniPath))
                 {
-                    errorMessage = "INI file does not exist. Run RecordLdapServerDetailsSimple first.";
+                    errorMessage = "INI file does not exist.";
                     return false;
                 }
 
@@ -104,6 +133,34 @@ namespace LDAP_DLL
                     // Append new entry
                     lines.Add($"{name},{type},{permissionType}");
                 }
+
+                File.WriteAllLines(iniPath, lines);
+
+                errorMessage = null;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                return false;
+            }
+        }
+
+        // Clear all user and group entries, keeping only comments and the server details line
+        public static bool ClearLdapPermissions(out string errorMessage)
+        {
+            try
+            {
+                string iniPath = GetIniPath();
+                if (!File.Exists(iniPath))
+                {
+                    errorMessage = "INI file does not exist.";
+                    return false;
+                }
+
+                var lines = File.ReadAllLines(iniPath)
+                    .Where(line => line.Trim().StartsWith("#") || string.IsNullOrWhiteSpace(line) || line.Trim().StartsWith("Server:"))
+                    .ToList();
 
                 File.WriteAllLines(iniPath, lines);
 

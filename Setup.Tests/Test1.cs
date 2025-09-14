@@ -7,7 +7,7 @@ using LDAP_DLL;
 namespace LDAP_DLL.Tests
 {
     [TestClass]
-    public class SetupTests
+    public class SSetupTests
     {
         public TestContext TestContext { get; set; }
         private string _testDir = string.Empty;
@@ -76,7 +76,7 @@ namespace LDAP_DLL.Tests
         public void RecordLdapServerDetailsSimple_CreatesIniFile()
         {
             string error;
-            var result = Setup.RecordLdapServerDetailsSimple("192.168.20.228", "Avraham", out error);
+            var result = Setup.RecordLdapServerDetailsSimple("AccellixServer", out error);
             Assert.IsTrue(result, $"Should return true on success. Error: {error}");
             Assert.IsNull(error, $"Error should be null. Error: {error}");
             CopyIniToOutputDir();
@@ -98,7 +98,7 @@ namespace LDAP_DLL.Tests
         public void SaveLdapPermission_AppendsUserEntry_CorrectFormat()
         {
             string error;
-            Setup.RecordLdapServerDetailsSimple("192.168.20.228", "Avraham", out error);
+            Setup.RecordLdapServerDetailsSimple("192.168.20.228", out error);
             var result = Setup.SaveLdapPermission("jdoe", "U", "O", out error);
             Assert.IsTrue(result, $"Should return true on user permission save. Error: {error}");
             Assert.IsNull(error, $"Error should be null after user permission save. Error: {error}");
@@ -116,7 +116,7 @@ namespace LDAP_DLL.Tests
         public void SaveLdapPermission_AppendsGroupEntry_CorrectFormat()
         {
             string error;
-            Setup.RecordLdapServerDetailsSimple("192.168.20.228", "Avraham", out error);
+            Setup.RecordLdapServerDetailsSimple("AccellixServer", out error);
             var result = Setup.SaveLdapPermission("TestGroup", "G", "O", out error);
             Assert.IsTrue(result, $"Should return true on group permission save. Error: {error}");
             Assert.IsNull(error, $"Error should be null after group permission save. Error: {error}");
@@ -134,7 +134,7 @@ namespace LDAP_DLL.Tests
         public void SaveLdapPermission_UpdatesPermission()
         {
             string error;
-            Setup.RecordLdapServerDetailsSimple("192.168.20.228", "Avraham", out error);
+            Setup.RecordLdapServerDetailsSimple("AccellixServer", out error);
             Setup.SaveLdapPermission("jdoe", "U", "O", out error);
             var result = Setup.SaveLdapPermission("jdoe", "U", "A", out error);
             Assert.IsTrue(result, $"Should return true on permission update. Error: {error}");
@@ -145,7 +145,7 @@ namespace LDAP_DLL.Tests
             var iniPath = Path.Combine(outputDir, "LDAP.ini");
             var content = File.ReadAllText(iniPath);
             TestContext.WriteLine("INI file content: " + content);
-            Assert.IsTrue(content.Contains("TestGroup,G,A"), "Permission type should be updated to 'A'");
+            Assert.IsTrue(content.Contains("jdoe,U,A"), "Permission type should be updated to 'A'");
         }
 
         [TestMethod]
@@ -190,9 +190,37 @@ namespace LDAP_DLL.Tests
         public void TestConnection_ReturnsBoolAndError()
         {
             string error;
-            var result = Setup.TestConnection("192.168.40.10", out error);
+            var result = Setup.TestConnection("192.168.20.228", out error);
             TestContext.WriteLine($"TestConnection result: {result}, error: {error}");
             Assert.IsTrue(result == true || result == false, "Should return a bool");
+        }
+
+        [TestMethod]
+        public void ClearLdapPermissions_RemovesAllUserAndGroupEntries()
+        {
+            string error;
+            // Create INI with server details and user/group entries
+            Setup.RecordLdapServerDetailsSimple("AccellixServer", out error);
+            Setup.SaveLdapPermission("jdoe", "U", "O", out error);
+            Setup.SaveLdapPermission("TestGroup", "G", "A", out error);
+            CopyIniToOutputDir();
+
+            // Act
+            var result = Setup.ClearLdapPermissions(out error);
+            Assert.IsTrue(result, $"Should return true on clear. Error: {error}");
+            Assert.IsNull(error, $"Error should be null after clear. Error: {error}");
+            CopyIniToOutputDir();
+
+            var outputDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var iniPath = Path.Combine(outputDir, "LDAP.ini");
+            var content = File.ReadAllText(iniPath);
+            TestContext.WriteLine("INI file content after clear: " + content);
+
+            // Assert: no user/group entries remain
+            Assert.IsFalse(content.Contains("jdoe,U,O"), "User entry should be removed");
+            Assert.IsFalse(content.Contains("TestGroup,G,A"), "Group entry should be removed");
+            Assert.IsTrue(content.Contains("Server: IPs="), "Server line should remain");
+            Assert.IsTrue(content.Contains("# LDAP Configuration File"), "Header should remain");
         }
     }
 }
