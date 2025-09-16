@@ -9,6 +9,7 @@ namespace LDAP_DLL.Tests
     public class AuthenticationTests
     {
         private string _iniPath;
+        public TestContext TestContext { get; set; } // Add this property
 
         [TestInitialize]
         public void Init()
@@ -21,9 +22,9 @@ namespace LDAP_DLL.Tests
 
             // Use Setup methods to create the INI file and add entries
             string error;
-            Setup.RecordLdapServerDetailsSimple("LDAP://localhost", out error);
+            Setup.RecordLdapServerDetailsSimple("AccellixServer", out error);
             Setup.SaveLdapPermission("jdoe", "U", "A", out error);
-            Setup.SaveLdapPermission("TestGroup", "G", "O", out error);
+            Setup.SaveLdapPermission("Engineering", "G", "O", out error);
         }
 
         [TestCleanup]
@@ -45,6 +46,7 @@ namespace LDAP_DLL.Tests
 
         [TestMethod]
         public void IsUserRegistered_ReturnsFalse_WhenUserDoesNotExist()
+
         {
             string error;
             var result = Authentication.IsUserRegistered("notfound", "A", out error);
@@ -65,22 +67,42 @@ namespace LDAP_DLL.Tests
         [TestMethod]
         public void IsUserInRegisteredGroup_ReturnsTrue_WhenGroupExistsWithPermission()
         {
-            // This test assumes LDAP_Functions.GetGroupsForUserArray returns "TestGroup"
-            // You may need to mock this method for a real unit test
             string error;
-            var result = Authentication.IsUserInRegisteredGroup("TestGroup", "anyuser", "anypass", "O", out error);
-            // This will only work if LDAP_Functions.GetGroupsForUserArray returns ["TestGroup"]
-            // Otherwise, you need to mock/stub that method
-            // Assert.IsTrue(result, "Should return true for group with correct permission");
+            var result = Authentication.IsUserInRegisteredGroup("emiller", "Avraham", "Acx2020", "O", out error);
+            Assert.IsTrue(result, "Should return true for group with correct permission");
         }
 
         [TestMethod]
         public void AuthenticateUser_ReturnsFalse_WhenUserAndGroupNotFound()
         {
             string error;
-            var result = Authentication.AuthenticateUser("notfound", "badpass", "A", out error);
+            var result = Authentication.AuthenticateUser("jdoe", "Acx2020", "A", out error);
             Assert.IsFalse(result, "Should return false for non-existent user");
+            Assert.IsNotNull(error, "Error should not be null when authentication fails");
             Assert.IsTrue(error.Contains("User does not have the required permission type") || error.Contains("User not found in INI file."));
+        }
+
+        [TestMethod]
+        public void GetGroupsForUserArray_ReturnsGroups_WhenUserExists()
+        {
+            // Arrange
+            string ldapPath = "fe80::c896:5f71:35aa:3443%17"; // Use your actual LDAP path or server
+            string userName = "Avraham"; // The sAMAccountName of the user
+            string username = "Avraham"; // LDAP bind username (may need DOMAIN\\username)
+            string password = "Acx2020"; // LDAP bind password
+
+            // Act
+            string error;
+            var groups = LDAP_DLL.LDAP_Functions.GetGroupsForUserArray(ldapPath, out error, userName, username, password);
+
+            // Assert
+            if (!string.IsNullOrEmpty(error))
+            {
+                Assert.Fail("LDAP error: " + error);
+            }
+            Assert.IsNotNull(groups, "Groups array should not be null");
+            Assert.IsTrue(groups.Length > 0, "User should belong to at least one group");
+            TestContext.WriteLine("Groups: " + string.Join(", ", groups)); // Use instance property
         }
     }
 }

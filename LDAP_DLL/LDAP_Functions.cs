@@ -144,7 +144,7 @@ namespace LDAP_DLL
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
-                    searcher.Filter = $"(&(objectClass=user)(sAMAccountName={userName}))";
+                    searcher.Filter = $"(&(objectClass=user)(|(sAMAccountName=*{userName}*)(displayName=*{userName}*)))";
                     searcher.PropertiesToLoad.Add("memberOf");
                     var result = searcher.FindOne();
                     if (result == null)

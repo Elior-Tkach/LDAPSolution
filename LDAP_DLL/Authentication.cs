@@ -8,7 +8,7 @@ using System.IO;
 
 namespace LDAP_DLL
 {
-    public class Authentication
+    internal class Authentication
     {
         // Helper to get LDAP path (host) from INI file header
         private static string GetLdapPathFromIni()
@@ -25,7 +25,7 @@ namespace LDAP_DLL
                     var IPEq = IPPart.IndexOf("IPs=");
                     if (IPEq >= 0)
                     {
-                        return IPPart.Substring(IPEq + 5).Trim();
+                        return IPPart.Substring(IPEq + 4).Trim();
                     }
                 }
             }
@@ -38,6 +38,8 @@ namespace LDAP_DLL
             try
             {
                 string ldapPath = GetLdapPathFromIni();
+                if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
+                    ldapPath = "LDAP://" + ldapPath;
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 {
                     // Force authentication by accessing NativeObject

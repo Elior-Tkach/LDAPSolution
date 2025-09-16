@@ -170,7 +170,7 @@ namespace LDAP_DLL.Tests
         public void GetAllGroups_ReturnsArrayOrError()
         {
             string error;
-            var result = Setup.GetAllGroups("AccellixServer", out error, "Avraham", "Acx2020");
+            var result = Setup.GetAllGroups("fe80::c896:5f71:35aa:3443%17", out error, "Avraham", "Acx2020");
             TestContext.WriteLine($"GetAllGroups result: [{string.Join(", ", result)}], error: {error}");
             Assert.IsNotNull(result, "Should return a string array (may be empty)");
             Assert.IsTrue(result is string[], "Should return a string array");
