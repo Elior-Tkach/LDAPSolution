@@ -8,12 +8,17 @@ using System.IO;
 
 namespace LDAP_DLL
 {
-    internal class Authentication
+    public class LDAP_Authentication
     {
+
+        internal LDAP_Authentication()
+        {
+        }
+
         // Helper to get LDAP path (host) from INI file header
         private static string GetLdapPathFromIni()
         {
-            string iniPath = Setup.GetIniPath();
+            string iniPath = LDAP_Setup.GetIniPath();
             if (!File.Exists(iniPath))
                 throw new FileNotFoundException("INI file does not exist.");
             var lines = File.ReadAllLines(iniPath);
@@ -67,12 +72,12 @@ namespace LDAP_DLL
             }
         }
 
-        public static bool IsUserRegistered(string userName, string expectedPermissionType, out string errorMessage)
+        internal static bool IsUserRegistered(string userName, string expectedPermissionType, out string errorMessage)
         {
             errorMessage = null;
             try
             {
-                string iniPath = Setup.GetIniPath();
+                string iniPath = LDAP_Setup.GetIniPath();
                 if (!File.Exists(iniPath))
                 {
                     errorMessage = "INI file does not exist.";
@@ -106,7 +111,7 @@ namespace LDAP_DLL
             }
         }
 
-        public static bool IsUserInRegisteredGroup(string userName, string username, string password, string permissionType, out string errorMessage)
+        internal static bool IsUserInRegisteredGroup(string userName, string username, string password, string permissionType, out string errorMessage)
         {
             errorMessage = null;
             try
@@ -119,7 +124,7 @@ namespace LDAP_DLL
                         errorMessage = "User does not belong to any groups or failed to retrieve groups.";
                     return false;
                 }
-                string iniPath = Setup.GetIniPath();
+                string iniPath = LDAP_Setup.GetIniPath();
                 if (!File.Exists(iniPath))
                 {
                     errorMessage = "INI file does not exist.";

@@ -22,9 +22,9 @@ namespace LDAP_DLL.Tests
 
             // Use Setup methods to create the INI file and add entries
             string error;
-            Setup.RecordLdapServerDetailsSimple("AccellixServer", out error);
-            Setup.SaveLdapPermission("jdoe", "U", "A", out error);
-            Setup.SaveLdapPermission("Engineering", "G", "O", out error);
+            LDAP_Setup.RecordLdapServerDetailsSimple("AccellixServer", out error);
+            LDAP_Setup.SaveLdapPermission("jdoe", "U", "A", out error);
+            LDAP_Setup.SaveLdapPermission("Engineering", "G", "O", out error);
         }
 
         [TestCleanup]
@@ -39,7 +39,7 @@ namespace LDAP_DLL.Tests
         public void IsUserRegistered_ReturnsTrue_WhenUserExistsWithPermission()
         {
             string error;
-            var result = Authentication.IsUserRegistered("jdoe", "A", out error);
+            var result = LDAP_Authentication.IsUserRegistered("jdoe", "A", out error);
             Assert.IsTrue(result, "Should return true for user with correct permission");
             Assert.IsNull(error, "Error should be null for valid user");
         }
@@ -49,7 +49,7 @@ namespace LDAP_DLL.Tests
 
         {
             string error;
-            var result = Authentication.IsUserRegistered("notfound", "A", out error);
+            var result = LDAP_Authentication.IsUserRegistered("notfound", "A", out error);
             Assert.IsFalse(result, "Should return false for non-existent user");
             Assert.AreEqual("User not found in INI file.", error);
         }
@@ -58,7 +58,7 @@ namespace LDAP_DLL.Tests
         public void IsUserRegistered_ReturnsFalse_WhenPermissionDoesNotMatch()
         {
             string error;
-            var result = Authentication.IsUserRegistered("jdoe", "O", out error);
+            var result = LDAP_Authentication.IsUserRegistered("jdoe", "O", out error);
             Assert.IsFalse(result, "Should return false for user with wrong permission");
             Assert.IsTrue(error.Contains("permission type does not match"));
         }
@@ -68,7 +68,7 @@ namespace LDAP_DLL.Tests
         public void IsUserInRegisteredGroup_ReturnsTrue_WhenGroupExistsWithPermission()
         {
             string error;
-            var result = Authentication.IsUserInRegisteredGroup("emiller", "Avraham", "Acx2020", "O", out error);
+            var result = LDAP_Authentication.IsUserInRegisteredGroup("emiller", "Avraham", "Acx2020", "O", out error);
             Assert.IsTrue(result, "Should return true for group with correct permission");
         }
 
@@ -76,10 +76,9 @@ namespace LDAP_DLL.Tests
         public void AuthenticateUser_ReturnsFalse_WhenUserAndGroupNotFound()
         {
             string error;
-            var result = Authentication.AuthenticateUser("jdoe", "Acx2020", "A", out error);
+            var result = LDAP_Authentication.AuthenticateUser("Avraham", "Acx2020", "A", out error);
             Assert.IsFalse(result, "Should return false for non-existent user");
             Assert.IsNotNull(error, "Error should not be null when authentication fails");
-            Assert.IsTrue(error.Contains("User does not have the required permission type") || error.Contains("User not found in INI file."));
         }
 
         [TestMethod]

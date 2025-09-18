@@ -7,8 +7,8 @@
     <ProjectGuid>{84B19F81-1F77-46DD-99F1-C94F2A292388}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LDAP_Functions</RootNamespace>
-    <AssemblyName>LDAP_Functions</AssemblyName>
+    <RootNamespace>LDAP_DLL</RootNamespace>
+    <AssemblyName>LDAP_DLL</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -42,10 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authentication.cs" />
+    <Compile Include="LDAP_Authentication.cs" />
     <Compile Include="LDAP_Functions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Setup.cs" />
+    <Compile Include="LDAP_Setup.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

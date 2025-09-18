@@ -5,8 +5,14 @@ using System.Linq;
 
 namespace LDAP_DLL
 {
-    internal class Setup
+    public class LDAP_Setup
     {
+
+        internal LDAP_Setup()
+        {
+        }
+
+
         // Helper to get the INI file path
         internal static string GetIniPath()
         {
@@ -16,7 +22,7 @@ namespace LDAP_DLL
         }
 
         // Writes server data as the header if not present
-        internal static bool RecordLdapServerDetailsSimple(string host, out string errorMessage)
+        public static bool RecordLdapServerDetailsSimple(string host, out string errorMessage)
         {
             try
             {

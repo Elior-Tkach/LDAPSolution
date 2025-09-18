@@ -8,7 +8,7 @@ using System.Net.NetworkInformation;
 
 namespace LDAP_DLL
 {
-    public class LDAP_Functions
+    internal class LDAP_Functions
     {
         // -------------------------
         // Basic Ping method
