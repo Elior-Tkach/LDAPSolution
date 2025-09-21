@@ -22,7 +22,7 @@ namespace LDAP_DLL
         {
             string iniPath = LDAP_Setup.GetIniPath();
             if (!File.Exists(iniPath))
-                throw new FileNotFoundException("INI file does not exist.");
+                throw new LdapIniFileNotFoundException();
             var lines = File.ReadAllLines(iniPath);
             foreach (var line in lines)
             {
@@ -36,56 +36,7 @@ namespace LDAP_DLL
                     }
                 }
             }
-            throw new InvalidOperationException("LDAP IP not found in INI file header.");
-        }
-
-        public static LdapResponse AuthenticateUser(string username, string password, string permissionType)
-        {
-            logger.Info($"AuthenticateUser called with username: {username}, permissionType: {permissionType}");
-            var response = new LdapResponse();
-            string errorMessage = string.Empty;
-            try
-            {
-                string ldapPath = GetLdapPathFromIni();
-                if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
-                    ldapPath = "LDAP://" + ldapPath;
-                using (var entry = new DirectoryEntry(ldapPath, username, password))
-                {
-                    // Force authentication by accessing NativeObject
-                    var obj = entry.NativeObject;
-                }
-                // Check user permission
-                if (IsUserRegistered(username, permissionType, out errorMessage))
-                {
-                    logger.Info($"User '{username}' authenticated and registered with permission '{permissionType}'.");
-                    response.ResultBool = true;
-                    return response;
-                }
-                // Check group permission
-                if (IsUserInRegisteredGroup(username, username, password, permissionType, out errorMessage))
-                {
-                    logger.Info($"User '{username}' authenticated via group with permission '{permissionType}'.");
-                    response.ResultBool = true;
-                    return response;
-                }
-                // If neither, return false
-                if (string.IsNullOrEmpty(errorMessage))
-                    errorMessage = "User does not have the required permission type.";
-                logger.Warn($"Authentication failed for user '{username}': {errorMessage}");
-                response.Success = false;
-                response.ErrorMessage = errorMessage;
-                response.ResultBool = false;
-                return response;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = ex.Message;
-                logger.Error(ex, $"AuthenticateUser exception for user '{username}': {errorMessage}");
-                response.Success = false;
-                response.ErrorMessage = errorMessage;
-                response.ResultBool = false;
-                return response;
-            }
+            throw new LdapIpNotFoundException();
         }
 
         internal static bool IsUserRegistered(string userName, string expectedPermissionType, out string errorMessage)
@@ -97,9 +48,7 @@ namespace LDAP_DLL
                 string iniPath = LDAP_Setup.GetIniPath();
                 if (!File.Exists(iniPath))
                 {
-                    errorMessage = "INI file does not exist.";
-                    logger.Warn(errorMessage);
-                    return false;
+                    throw new LdapIniFileNotFoundException();
                 }
                 var lines = File.ReadAllLines(iniPath);
                 foreach (var line in lines)
@@ -115,13 +64,21 @@ namespace LDAP_DLL
                         }
                         else
                         {
-                            errorMessage = $"User found, but permission type does not match. Expected: {expectedPermissionType}, Found: {parts[2]}";
-                            logger.Warn(errorMessage);
-                            return false;
+                            throw new LdapPermissionMismatchException(expectedPermissionType, parts[2]);
                         }
                     }
                 }
-                errorMessage = "User not found in INI file.";
+                throw new LdapUserNotFoundException(userName);
+            }
+            catch (LdapSetupException ex)
+            {
+                errorMessage = ex.Message;
+                logger.Warn(errorMessage);
+                return false;
+            }
+            catch (LdapAuthenticationException ex)
+            {
+                errorMessage = ex.Message;
                 logger.Warn(errorMessage);
                 return false;
             }
@@ -143,17 +100,12 @@ namespace LDAP_DLL
                 var userGroups = LDAP_Functions.GetGroupsForUserArray(ldapPath, out errorMessage, userName, username, password);
                 if (userGroups == null || userGroups.Length == 0)
                 {
-                    if (string.IsNullOrEmpty(errorMessage))
-                        errorMessage = "User does not belong to any groups or failed to retrieve groups.";
-                    logger.Warn($"User '{userName}' group check failed: {errorMessage}");
-                    return false;
+                    throw new LdapUserNotInGroupException(userName);
                 }
                 string iniPath = LDAP_Setup.GetIniPath();
                 if (!File.Exists(iniPath))
                 {
-                    errorMessage = "INI file does not exist.";
-                    logger.Warn(errorMessage);
-                    return false;
+                    throw new LdapIniFileNotFoundException();
                 }
                 var lines = File.ReadAllLines(iniPath);
                 foreach (var group in userGroups)
@@ -172,7 +124,17 @@ namespace LDAP_DLL
                         }
                     }
                 }
-                errorMessage = $"No registered group found for user in INI file with permission type '{permissionType}'.";
+                throw new LdapNoRegisteredGroupException(permissionType);
+            }
+            catch (LdapSetupException ex)
+            {
+                errorMessage = ex.Message;
+                logger.Warn(errorMessage);
+                return false;
+            }
+            catch (LdapAuthenticationException ex)
+            {
+                errorMessage = ex.Message;
                 logger.Warn(errorMessage);
                 return false;
             }
@@ -182,6 +144,102 @@ namespace LDAP_DLL
                 logger.Error(ex, $"IsUserInRegisteredGroup exception for user '{userName}': {errorMessage}");
                 return false;
             }
+        }
+
+        public static LdapResponse AuthenticateUser(string username, string password, string permissionType)
+        {
+            logger.Info($"AuthenticateUser called with username: {username}, permissionType: {permissionType}");
+            var response = new LdapResponse();
+            try
+            {
+                string ldapPath = GetLdapPathFromIni();
+                if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
+                    ldapPath = "LDAP://" + ldapPath;
+                using (var entry = new DirectoryEntry(ldapPath, username, password))
+                {
+                    // Force authentication by accessing NativeObject
+                    var obj = entry.NativeObject;
+                }
+                // Check user permission
+                try
+                {
+                    if (IsUserRegistered(username, permissionType, out string errorMessage))
+                    {
+                        logger.Info($"User '{username}' authenticated and registered with permission '{permissionType}'.");
+                        response.ResultBool = true;
+                        return response;
+                    }
+                }
+                catch (LdapAuthenticationException ex)
+                {
+                    // If not user, try group
+                    logger.Warn($"User permission check failed: {ex.Message}");
+                    // Only try group if user not found or permission mismatch
+                    try
+                    {
+                        if (IsUserInRegisteredGroup(username, username, password, permissionType, out string errorMessage))
+                        {
+                            logger.Info($"User '{username}' authenticated via group with permission '{permissionType}'.");
+                            response.ResultBool = true;
+                            return response;
+                        }
+                    }
+                    catch (LdapUserNotInGroupException gex)
+                    {
+                        // Set error number for group not found
+                        response.Success = false;
+                        response.ErrorMessage = gex.Message;
+                        response.ErrorNumber = gex.ErrorNumber;
+                        response.ResultBool = false;
+                        return response;
+                    }
+                    catch (LdapAuthenticationException gex)
+                    {
+                        response.Success = false;
+                        response.ErrorMessage = gex.Message;
+                        response.ErrorNumber = gex.ErrorNumber;
+                        response.ResultBool = false;
+                        return response;
+                    }
+                    catch (Exception ex2)
+                    {
+                        logger.Error(ex2, $"Unexpected error while checking group registration for user '{username}': {ex2.Message}");
+                        response.Success = false;
+                        response.ErrorMessage = ex2.Message;
+                        response.ErrorNumber = 4999;
+                        response.ResultBool = false;
+                        return response;
+                    }
+                }
+            }
+            catch (LdapSetupException ex)
+            {
+                logger.Error(ex, $"Setup exception for user '{username}': {ex.Message}");
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
+                response.ResultBool = false;
+                return response;
+            }
+            catch (LdapAuthenticationException ex)
+            {
+                logger.Error(ex, $"Authentication exception for user '{username}': {ex.Message}");
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
+                response.ResultBool = false;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"AuthenticateUser exception for user '{username}': {ex.Message}");
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = 4999;
+                response.ResultBool = false;
+                return response;
+            }
+            return response;
         }
     }
 }

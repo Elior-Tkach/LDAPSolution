@@ -10,6 +10,11 @@ namespace LDAP_DLL
         public bool Success { get; set; } = true;
 
         /// <summary>
+        /// Error number for custom exceptions (0 = no error)
+        /// </summary>
+        public int ErrorNumber { get; set; } = 0;
+
+        /// <summary>
         /// Error message if the operation failed
         /// </summary>
         public string ErrorMessage { get; set; } = "";
@@ -28,5 +33,7 @@ namespace LDAP_DLL
         /// Optional boolean result (for functions returning true/false)
         /// </summary>
         public bool ResultBool { get; set; } = false;
+
+
     }
 }
