@@ -2,11 +2,13 @@
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using NLog;
 
 namespace LDAP_DLL
 {
     public class LDAP_Setup
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         internal LDAP_Setup()
         {
@@ -24,6 +26,7 @@ namespace LDAP_DLL
         // Writes server data as the header if not present
         public static bool RecordLdapServerDetailsSimple(string host, out string errorMessage)
         {
+            logger.Info($"RecordLdapServerDetailsSimple called with host: {host}");
             try
             {
                 // Get server details using PingServerSimple
@@ -33,6 +36,7 @@ namespace LDAP_DLL
                 if (!pingSuccess)
                 {
                     errorMessage = $"Failed to ping server: {pingInfo}";
+                    logger.Warn(errorMessage);
                     return false;
                 }
 
@@ -64,6 +68,7 @@ namespace LDAP_DLL
                     sb.AppendLine("# type: U= user, G= group");
                     sb.AppendLine("# permission: A = Admin, O = Operator");
                     File.WriteAllText(iniPath, sb.ToString());
+                    logger.Info($"Created new INI file at {iniPath} with server details.");
                 }
                 else
                 {
@@ -76,6 +81,7 @@ namespace LDAP_DLL
                             {
                                 // Details are the same, do nothing
                                 errorMessage = null;
+                                logger.Info("Server details unchanged in INI file.");
                                 return true;
                             }
                             else
@@ -84,12 +90,14 @@ namespace LDAP_DLL
                                 lines[i] = newServerLine;
                                 File.WriteAllLines(iniPath, lines);
                                 errorMessage = null;
+                                logger.Info($"Updated server details in INI file at {iniPath}.");
                                 return true;
                             }
                         }
                     }
                     // If we reach here, "Server:" line was not found, do nothing as per user request
                     errorMessage = null;
+                    logger.Info("No server line found in INI file; no changes made.");
                     return true;
                 }
                 errorMessage = null;
@@ -98,6 +106,7 @@ namespace LDAP_DLL
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
+                logger.Error(ex, $"RecordLdapServerDetailsSimple exception: {errorMessage}");
                 return false;
             }
         }
@@ -106,12 +115,14 @@ namespace LDAP_DLL
         // Unified function to save (add or update) a user/group entry
         public static bool SaveLdapPermission(string name, string type, string permissionType, out string errorMessage)
         {
+            logger.Info($"SaveLdapPermission called with name: {name}, type: {type}, permissionType: {permissionType}");
             try
             {
                 string iniPath = GetIniPath();
                 if (!File.Exists(iniPath))
                 {
                     errorMessage = "INI file does not exist.";
+                    logger.Warn(errorMessage);
                     return false;
                 }
 
@@ -130,6 +141,7 @@ namespace LDAP_DLL
                         parts[2] = permissionType;
                         lines[i] = string.Join(",", parts);
                         found = true;
+                        logger.Info($"Updated permission for {name} ({type}) to {permissionType} in INI file.");
                         break;
                     }
                 }
@@ -138,6 +150,7 @@ namespace LDAP_DLL
                 {
                     // Append new entry
                     lines.Add($"{name},{type},{permissionType}");
+                    logger.Info($"Added new permission entry for {name} ({type}) with permission {permissionType}.");
                 }
 
                 File.WriteAllLines(iniPath, lines);
@@ -148,6 +161,7 @@ namespace LDAP_DLL
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
+                logger.Error(ex, $"SaveLdapPermission exception: {errorMessage}");
                 return false;
             }
         }
@@ -155,12 +169,14 @@ namespace LDAP_DLL
         // Clear all user and group entries, keeping only comments and the server details line
         public static bool ClearLdapPermissions(out string errorMessage)
         {
+            logger.Info("ClearLdapPermissions called");
             try
             {
                 string iniPath = GetIniPath();
                 if (!File.Exists(iniPath))
                 {
                     errorMessage = "INI file does not exist.";
+                    logger.Warn(errorMessage);
                     return false;
                 }
 
@@ -171,11 +187,13 @@ namespace LDAP_DLL
                 File.WriteAllLines(iniPath, lines);
 
                 errorMessage = null;
+                logger.Info("Cleared all user and group permissions from INI file.");
                 return true;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
+                logger.Error(ex, $"ClearLdapPermissions exception: {errorMessage}");
                 return false;
             }
         }

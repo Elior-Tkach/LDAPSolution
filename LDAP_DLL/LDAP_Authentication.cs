@@ -5,11 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.DirectoryServices;
 using System.IO;
+using NLog;
 
 namespace LDAP_DLL
 {
     public class LDAP_Authentication
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         internal LDAP_Authentication()
         {
@@ -39,6 +41,7 @@ namespace LDAP_DLL
 
         public static bool AuthenticateUser(string username, string password, string permissionType, out string errorMessage)
         {
+            logger.Info($"AuthenticateUser called with username: {username}, permissionType: {permissionType}");
             errorMessage = string.Empty;
             try
             {
@@ -53,27 +56,32 @@ namespace LDAP_DLL
                 // Check user permission
                 if (IsUserRegistered(username, permissionType, out errorMessage))
                 {
+                    logger.Info($"User '{username}' authenticated and registered with permission '{permissionType}'.");
                     return true;
                 }
                 // Check group permission
                 if (IsUserInRegisteredGroup(username, username, password, permissionType, out errorMessage))
                 {
+                    logger.Info($"User '{username}' authenticated via group with permission '{permissionType}'.");
                     return true;
                 }
                 // If neither, return false
                 if (string.IsNullOrEmpty(errorMessage))
                     errorMessage = "User does not have the required permission type.";
+                logger.Warn($"Authentication failed for user '{username}': {errorMessage}");
                 return false;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
+                logger.Error(ex, $"AuthenticateUser exception for user '{username}': {errorMessage}");
                 return false;
             }
         }
 
         internal static bool IsUserRegistered(string userName, string expectedPermissionType, out string errorMessage)
         {
+            logger.Info($"IsUserRegistered called with userName: {userName}, expectedPermissionType: {expectedPermissionType}");
             errorMessage = null;
             try
             {
@@ -81,6 +89,7 @@ namespace LDAP_DLL
                 if (!File.Exists(iniPath))
                 {
                     errorMessage = "INI file does not exist.";
+                    logger.Warn(errorMessage);
                     return false;
                 }
                 var lines = File.ReadAllLines(iniPath);
@@ -92,27 +101,32 @@ namespace LDAP_DLL
                     {
                         if (string.Equals(parts[2], expectedPermissionType, StringComparison.OrdinalIgnoreCase))
                         {
+                            logger.Info($"User '{userName}' found with matching permission '{expectedPermissionType}'.");
                             return true;
                         }
                         else
                         {
                             errorMessage = $"User found, but permission type does not match. Expected: {expectedPermissionType}, Found: {parts[2]}";
+                            logger.Warn(errorMessage);
                             return false;
                         }
                     }
                 }
                 errorMessage = "User not found in INI file.";
+                logger.Warn(errorMessage);
                 return false;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
+                logger.Error(ex, $"IsUserRegistered exception for user '{userName}': {errorMessage}");
                 return false;
             }
         }
 
         internal static bool IsUserInRegisteredGroup(string userName, string username, string password, string permissionType, out string errorMessage)
         {
+            logger.Info($"IsUserInRegisteredGroup called with userName: {userName}, permissionType: {permissionType}");
             errorMessage = null;
             try
             {
@@ -122,12 +136,14 @@ namespace LDAP_DLL
                 {
                     if (string.IsNullOrEmpty(errorMessage))
                         errorMessage = "User does not belong to any groups or failed to retrieve groups.";
+                    logger.Warn($"User '{userName}' group check failed: {errorMessage}");
                     return false;
                 }
                 string iniPath = LDAP_Setup.GetIniPath();
                 if (!File.Exists(iniPath))
                 {
                     errorMessage = "INI file does not exist.";
+                    logger.Warn(errorMessage);
                     return false;
                 }
                 var lines = File.ReadAllLines(iniPath);
@@ -141,17 +157,20 @@ namespace LDAP_DLL
                         {
                             if (string.Equals(parts[2], permissionType, StringComparison.OrdinalIgnoreCase))
                             {
+                                logger.Info($"User '{userName}' is in group '{group}' with permission '{permissionType}'.");
                                 return true;
                             }
                         }
                     }
                 }
                 errorMessage = $"No registered group found for user in INI file with permission type '{permissionType}'.";
+                logger.Warn(errorMessage);
                 return false;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
+                logger.Error(ex, $"IsUserInRegisteredGroup exception for user '{userName}': {errorMessage}");
                 return false;
             }
         }
