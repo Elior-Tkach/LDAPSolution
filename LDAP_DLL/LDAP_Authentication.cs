@@ -39,10 +39,11 @@ namespace LDAP_DLL
             throw new InvalidOperationException("LDAP IP not found in INI file header.");
         }
 
-        public static bool AuthenticateUser(string username, string password, string permissionType, out string errorMessage)
+        public static LdapResponse AuthenticateUser(string username, string password, string permissionType)
         {
             logger.Info($"AuthenticateUser called with username: {username}, permissionType: {permissionType}");
-            errorMessage = string.Empty;
+            var response = new LdapResponse();
+            string errorMessage = string.Empty;
             try
             {
                 string ldapPath = GetLdapPathFromIni();
@@ -57,25 +58,33 @@ namespace LDAP_DLL
                 if (IsUserRegistered(username, permissionType, out errorMessage))
                 {
                     logger.Info($"User '{username}' authenticated and registered with permission '{permissionType}'.");
-                    return true;
+                    response.ResultBool = true;
+                    return response;
                 }
                 // Check group permission
                 if (IsUserInRegisteredGroup(username, username, password, permissionType, out errorMessage))
                 {
                     logger.Info($"User '{username}' authenticated via group with permission '{permissionType}'.");
-                    return true;
+                    response.ResultBool = true;
+                    return response;
                 }
                 // If neither, return false
                 if (string.IsNullOrEmpty(errorMessage))
                     errorMessage = "User does not have the required permission type.";
                 logger.Warn($"Authentication failed for user '{username}': {errorMessage}");
-                return false;
+                response.Success = false;
+                response.ErrorMessage = errorMessage;
+                response.ResultBool = false;
+                return response;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
                 logger.Error(ex, $"AuthenticateUser exception for user '{username}': {errorMessage}");
-                return false;
+                response.Success = false;
+                response.ErrorMessage = errorMessage;
+                response.ResultBool = false;
+                return response;
             }
         }
 

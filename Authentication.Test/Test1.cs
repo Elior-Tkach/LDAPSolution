@@ -21,10 +21,9 @@ namespace LDAP_DLL.Tests
             _iniPath = Path.Combine(testDir, "LDAP.ini");
 
             // Use Setup methods to create the INI file and add entries
-            string error;
-            LDAP_Setup.RecordLdapServerDetailsSimple("AccellixServer", out error);
-            LDAP_Setup.SaveLdapPermission("jdoe", "U", "A", out error);
-            LDAP_Setup.SaveLdapPermission("Engineering", "G", "O", out error);
+            LDAP_Setup.RecordLdapServerDetailsSimple("AccellixServer");
+            LDAP_Setup.SaveLdapPermission("jdoe", "U", "A");
+            LDAP_Setup.SaveLdapPermission("Engineering", "G", "O");
         }
 
         [TestCleanup]
@@ -41,12 +40,11 @@ namespace LDAP_DLL.Tests
             string error;
             var result = LDAP_Authentication.IsUserRegistered("jdoe", "A", out error);
             Assert.IsTrue(result, "Should return true for user with correct permission");
-            Assert.IsNull(error, "Error should be null for valid user");
+            Assert.IsTrue(string.IsNullOrEmpty(error), "Error should be null or empty for valid user");
         }
 
         [TestMethod]
         public void IsUserRegistered_ReturnsFalse_WhenUserDoesNotExist()
-
         {
             string error;
             var result = LDAP_Authentication.IsUserRegistered("notfound", "A", out error);
@@ -63,22 +61,22 @@ namespace LDAP_DLL.Tests
             Assert.IsTrue(error.Contains("permission type does not match"));
         }
 
-        // You may need to mock LDAP_Functions.GetGroupsForUserArray for this test to work reliably
         [TestMethod]
         public void IsUserInRegisteredGroup_ReturnsTrue_WhenGroupExistsWithPermission()
         {
             string error;
-            var result = LDAP_Authentication.IsUserInRegisteredGroup("emiller", "Avraham", "Acx2020", "O", out error);
+            var result = LDAP_Authentication.IsUserInRegisteredGroup("Avraham", "Avraham", "Acx2020", "O", out error);
             Assert.IsTrue(result, "Should return true for group with correct permission");
+            Assert.IsTrue(string.IsNullOrEmpty(error), "Error should be null or empty for valid group");
         }
 
         [TestMethod]
         public void AuthenticateUser_ReturnsFalse_WhenUserAndGroupNotFound()
         {
-            string error;
-            var result = LDAP_Authentication.AuthenticateUser("Avraham", "Acx2020", "A", out error);
-            Assert.IsFalse(result, "Should return false for non-existent user");
-            Assert.IsNotNull(error, "Error should not be null when authentication fails");
+            var result = LDAP_Authentication.AuthenticateUser("Avraham", "Acx2020", "A");
+            Assert.IsFalse(result.ResultBool, "Should return false for non-existent user");
+            Assert.IsFalse(result.Success, "Operation should not be successful for non-existent user");
+            Assert.IsFalse(string.IsNullOrEmpty(result.ErrorMessage), "Error should not be null or empty when authentication fails");
         }
 
         [TestMethod]

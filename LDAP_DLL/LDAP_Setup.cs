@@ -24,9 +24,10 @@ namespace LDAP_DLL
         }
 
         // Writes server data as the header if not present
-        public static bool RecordLdapServerDetailsSimple(string host, out string errorMessage)
+        public static LdapResponse RecordLdapServerDetailsSimple(string host)
         {
             logger.Info($"RecordLdapServerDetailsSimple called with host: {host}");
+            var response = new LdapResponse();
             try
             {
                 // Get server details using PingServerSimple
@@ -35,9 +36,10 @@ namespace LDAP_DLL
 
                 if (!pingSuccess)
                 {
-                    errorMessage = $"Failed to ping server: {pingInfo}";
-                    logger.Warn(errorMessage);
-                    return false;
+                    response.Success = false;
+                    response.ErrorMessage = $"Failed to ping server: {pingInfo}";
+                    logger.Warn(response.ErrorMessage);
+                    return response;
                 }
 
                 // Parse pingInfo for IPs and HostName
@@ -80,50 +82,49 @@ namespace LDAP_DLL
                             if (lines[i].Trim() == newServerLine)
                             {
                                 // Details are the same, do nothing
-                                errorMessage = null;
                                 logger.Info("Server details unchanged in INI file.");
-                                return true;
+                                return response;
                             }
                             else
                             {
                                 // Update the line
                                 lines[i] = newServerLine;
                                 File.WriteAllLines(iniPath, lines);
-                                errorMessage = null;
                                 logger.Info($"Updated server details in INI file at {iniPath}.");
-                                return true;
+                                return response;
                             }
                         }
                     }
                     // If we reach here, "Server:" line was not found, do nothing as per user request
-                    errorMessage = null;
                     logger.Info("No server line found in INI file; no changes made.");
-                    return true;
+                    return response;
                 }
-                errorMessage = null;
-                return true;
+                return response;
             }
             catch (Exception ex)
             {
-                errorMessage = ex.Message;
-                logger.Error(ex, $"RecordLdapServerDetailsSimple exception: {errorMessage}");
-                return false;
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                logger.Error(ex, $"RecordLdapServerDetailsSimple exception: {response.ErrorMessage}");
+                return response;
             }
         }
 
 
         // Unified function to save (add or update) a user/group entry
-        public static bool SaveLdapPermission(string name, string type, string permissionType, out string errorMessage)
+        public static LdapResponse SaveLdapPermission(string name, string type, string permissionType)
         {
             logger.Info($"SaveLdapPermission called with name: {name}, type: {type}, permissionType: {permissionType}");
+            var response = new LdapResponse();
             try
             {
                 string iniPath = GetIniPath();
                 if (!File.Exists(iniPath))
                 {
-                    errorMessage = "INI file does not exist.";
-                    logger.Warn(errorMessage);
-                    return false;
+                    response.Success = false;
+                    response.ErrorMessage = "INI file does not exist.";
+                    logger.Warn(response.ErrorMessage);
+                    return response;
                 }
 
                 var lines = File.ReadAllLines(iniPath).ToList();
@@ -155,29 +156,31 @@ namespace LDAP_DLL
 
                 File.WriteAllLines(iniPath, lines);
 
-                errorMessage = null;
-                return true;
+                return response;
             }
             catch (Exception ex)
             {
-                errorMessage = ex.Message;
-                logger.Error(ex, $"SaveLdapPermission exception: {errorMessage}");
-                return false;
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                logger.Error(ex, $"SaveLdapPermission exception: {response.ErrorMessage}");
+                return response;
             }
         }
 
         // Clear all user and group entries, keeping only comments and the server details line
-        public static bool ClearLdapPermissions(out string errorMessage)
+        public static LdapResponse ClearLdapPermissions()
         {
             logger.Info("ClearLdapPermissions called");
+            var response = new LdapResponse();
             try
             {
                 string iniPath = GetIniPath();
                 if (!File.Exists(iniPath))
                 {
-                    errorMessage = "INI file does not exist.";
-                    logger.Warn(errorMessage);
-                    return false;
+                    response.Success = false;
+                    response.ErrorMessage = "INI file does not exist.";
+                    logger.Warn(response.ErrorMessage);
+                    return response;
                 }
 
                 var lines = File.ReadAllLines(iniPath)
@@ -186,42 +189,82 @@ namespace LDAP_DLL
 
                 File.WriteAllLines(iniPath, lines);
 
-                errorMessage = null;
                 logger.Info("Cleared all user and group permissions from INI file.");
-                return true;
+                return response;
             }
             catch (Exception ex)
             {
-                errorMessage = ex.Message;
-                logger.Error(ex, $"ClearLdapPermissions exception: {errorMessage}");
-                return false;
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                logger.Error(ex, $"ClearLdapPermissions exception: {response.ErrorMessage}");
+                return response;
             }
         }
 
         // LDAP passthrough functions
-        public static string GetUser(string ldapPath, out string errorMessage, string userName, string username, string password)
+        public static LdapResponse GetUser(string ldapPath, string userName, string username, string password)
         {
-            return LDAP_Functions.GetUserByUserNameSimple(ldapPath, out errorMessage, userName, username, password);
+            var response = new LdapResponse();
+            string errorMessage;
+            response.ResultString = LDAP_Functions.GetUserByUserNameSimple(ldapPath, out errorMessage, userName, username, password);
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                response.Success = false;
+                response.ErrorMessage = errorMessage;
+            }
+            return response;
         }
 
-        public static string GetGroup(string ldapPath, out string errorMessage, string groupName, string username, string password)
+        public static LdapResponse GetGroup(string ldapPath, string groupName, string username, string password)
         {
-            return LDAP_Functions.GetGroupByNameSimple(ldapPath, out errorMessage, groupName, username, password);
+            var response = new LdapResponse();
+            string errorMessage;
+            response.ResultString = LDAP_Functions.GetGroupByNameSimple(ldapPath, out errorMessage, groupName, username, password);
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                response.Success = false;
+                response.ErrorMessage = errorMessage;
+            }
+            return response;
         }
 
-        public static string[] GetAllGroups(string ldapPath, out string errorMessage, string username, string password)
+        public static LdapResponse GetAllGroups(string ldapPath, string username, string password)
         {
-            return LDAP_Functions.GetAllLdapGroupsArray(ldapPath, out errorMessage, username, password);
+            var response = new LdapResponse();
+            string errorMessage;
+            response.ResultArray = LDAP_Functions.GetAllLdapGroupsArray(ldapPath, out errorMessage, username, password);
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                response.Success = false;
+                response.ErrorMessage = errorMessage;
+            }
+            return response;
         }
 
-        public static string[] GetUsersInGroup(string ldapPath, out string errorMessage, string groupName, string username, string password)
+        public static LdapResponse GetUsersInGroup(string ldapPath, string groupName, string username, string password)
         {
-            return LDAP_Functions.GetUsersInGroupArray(ldapPath, out errorMessage, groupName, username, password);
+            var response = new LdapResponse();
+            string errorMessage;
+            response.ResultArray = LDAP_Functions.GetUsersInGroupArray(ldapPath, out errorMessage, groupName, username, password);
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                response.Success = false;
+                response.ErrorMessage = errorMessage;
+            }
+            return response;
         }
 
-        public static bool TestConnection(string host, out string errorMessage)
+        public static LdapResponse TestConnection(string host)
         {
-            return LDAP_Functions.PingServerSimple(host, out errorMessage);
+            var response = new LdapResponse();
+            string errorMessage;
+            response.ResultBool = LDAP_Functions.PingServerSimple(host, out errorMessage);
+            if (!response.ResultBool)
+            {
+                response.Success = false;
+                response.ErrorMessage = errorMessage;
+            }
+            return response;
         }
     }
 }
