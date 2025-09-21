@@ -69,4 +69,32 @@ namespace LDAP_DLL
         public LdapNoRegisteredGroupException(string permissionType)
             : base($"No registered group found for user in INI file with permission type '{permissionType}'.", 4005) { }
     }
+
+    // 4006: Invalid permission type
+    public class LdapInvalidPermissionTypeException : LdapSetupException
+    {
+        public LdapInvalidPermissionTypeException(string permissionType)
+            : base($"Invalid permission type: '{permissionType}'. Allowed: A (Admin), O (Operator).", 4006) { }
+    }
+
+    // 4007: Invalid entry type
+    public class LdapInvalidEntryTypeException : LdapSetupException
+    {
+        public LdapInvalidEntryTypeException(string entryType)
+            : base($"Invalid entry type: '{entryType}'. Allowed: U (User), G (Group).", 4007) { }
+    }
+
+    // 4008: INI file write error
+    public class LdapIniFileWriteException : LdapSetupException
+    {
+        public LdapIniFileWriteException(string message)
+            : base($"Failed to write to INI file: {message}", 4008) { }
+    }
+
+    // 4009: Ping to server failed
+    public class LdapPingFailedException : LdapSetupException
+    {
+        public LdapPingFailedException(string message)
+            : base($"Failed to ping server: {message}", 4009) { }
+    }
 }

@@ -36,10 +36,7 @@ namespace LDAP_DLL
 
                 if (!pingSuccess)
                 {
-                    response.Success = false;
-                    response.ErrorMessage = $"Failed to ping server: {pingInfo}";
-                    logger.Warn(response.ErrorMessage);
-                    return response;
+                    throw new LdapPingFailedException(pingInfo);
                 }
 
                 // Parse pingInfo for IPs and HostName
@@ -69,7 +66,14 @@ namespace LDAP_DLL
                     sb.AppendLine("# Columns: name,type,permission");
                     sb.AppendLine("# type: U= user, G= group");
                     sb.AppendLine("# permission: A = Admin, O = Operator");
-                    File.WriteAllText(iniPath, sb.ToString());
+                    try
+                    {
+                        File.WriteAllText(iniPath, sb.ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new LdapIniFileWriteException(ex.Message);
+                    }
                     logger.Info($"Created new INI file at {iniPath} with server details.");
                 }
                 else
@@ -89,7 +93,14 @@ namespace LDAP_DLL
                             {
                                 // Update the line
                                 lines[i] = newServerLine;
-                                File.WriteAllLines(iniPath, lines);
+                                try
+                                {
+                                    File.WriteAllLines(iniPath, lines);
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw new LdapIniFileWriteException(ex.Message);
+                                }
                                 logger.Info($"Updated server details in INI file at {iniPath}.");
                                 return response;
                             }
@@ -101,15 +112,23 @@ namespace LDAP_DLL
                 }
                 return response;
             }
+            catch (LdapSetupException ex)
+            {
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
+                logger.Error(ex, $"RecordLdapServerDetailsSimple exception: {response.ErrorMessage}");
+                return response;
+            }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
+                response.ErrorNumber = 4020;
                 logger.Error(ex, $"RecordLdapServerDetailsSimple exception: {response.ErrorMessage}");
                 return response;
             }
         }
-
 
         // Unified function to save (add or update) a user/group entry
         public static LdapResponse SaveLdapPermission(string name, string type, string permissionType)
@@ -121,12 +140,16 @@ namespace LDAP_DLL
                 string iniPath = GetIniPath();
                 if (!File.Exists(iniPath))
                 {
-                    response.Success = false;
-                    response.ErrorMessage = "INI file does not exist.";
-                    logger.Warn(response.ErrorMessage);
-                    return response;
+                    throw new LdapIniFileNotFoundException();
                 }
-
+                if (type != "U" && type != "G")
+                {
+                    throw new LdapInvalidEntryTypeException(type);
+                }
+                if (permissionType != "A" && permissionType != "O")
+                {
+                    throw new LdapInvalidPermissionTypeException(permissionType);
+                }
                 var lines = File.ReadAllLines(iniPath).ToList();
                 bool found = false;
 
@@ -153,15 +176,29 @@ namespace LDAP_DLL
                     lines.Add($"{name},{type},{permissionType}");
                     logger.Info($"Added new permission entry for {name} ({type}) with permission {permissionType}.");
                 }
-
-                File.WriteAllLines(iniPath, lines);
-
+                try
+                {
+                    File.WriteAllLines(iniPath, lines);
+                }
+                catch (Exception ex)
+                {
+                    throw new LdapIniFileWriteException(ex.Message);
+                }
+                return response;
+            }
+            catch (LdapSetupException ex)
+            {
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
+                logger.Error(ex, $"SaveLdapPermission exception: {response.ErrorMessage}");
                 return response;
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
+                response.ErrorNumber = 4020;
                 logger.Error(ex, $"SaveLdapPermission exception: {response.ErrorMessage}");
                 return response;
             }
@@ -177,25 +214,35 @@ namespace LDAP_DLL
                 string iniPath = GetIniPath();
                 if (!File.Exists(iniPath))
                 {
-                    response.Success = false;
-                    response.ErrorMessage = "INI file does not exist.";
-                    logger.Warn(response.ErrorMessage);
-                    return response;
+                    throw new LdapIniFileNotFoundException();
                 }
-
                 var lines = File.ReadAllLines(iniPath)
                     .Where(line => line.Trim().StartsWith("#") || string.IsNullOrWhiteSpace(line) || line.Trim().StartsWith("Server:"))
                     .ToList();
-
-                File.WriteAllLines(iniPath, lines);
-
+                try
+                {
+                    File.WriteAllLines(iniPath, lines);
+                }
+                catch (Exception ex)
+                {
+                    throw new LdapIniFileWriteException(ex.Message);
+                }
                 logger.Info("Cleared all user and group permissions from INI file.");
+                return response;
+            }
+            catch (LdapSetupException ex)
+            {
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
+                logger.Error(ex, $"ClearLdapPermissions exception: {response.ErrorMessage}");
                 return response;
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
+                response.ErrorNumber = 4020;
                 logger.Error(ex, $"ClearLdapPermissions exception: {response.ErrorMessage}");
                 return response;
             }

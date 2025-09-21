@@ -235,7 +235,7 @@ namespace LDAP_DLL
                 logger.Error(ex, $"AuthenticateUser exception for user '{username}': {ex.Message}");
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
-                response.ErrorNumber = 4999;
+                response.ErrorNumber = 4020;
                 response.ResultBool = false;
                 return response;
             }
