@@ -28,6 +28,19 @@ namespace LDAP_DLL
         }
     }
 
+    public class LdapFunctionsException : Exception
+    {
+        public int ErrorNumber { get; }
+        public LdapFunctionsException(string message, int errorNumber) : base(message)
+        {
+            ErrorNumber = errorNumber;
+        }
+        public LdapFunctionsException(string message, int errorNumber, Exception inner) : base(message, inner)
+        {
+            ErrorNumber = errorNumber;
+        }
+    }
+
     // 4000: User not found
     public class LdapUserNotFoundException : LdapAuthenticationException
     {
@@ -67,7 +80,7 @@ namespace LDAP_DLL
     public class LdapNoRegisteredGroupException : LdapAuthenticationException
     {
         public LdapNoRegisteredGroupException(string permissionType)
-            : base($"No registered group found for user in INI file with permission type '{permissionType}'.", 4005) { }
+            : base($"No registered group found for user in INI file.", 4005) { }
     }
 
     // 4006: Invalid permission type
@@ -96,5 +109,26 @@ namespace LDAP_DLL
     {
         public LdapPingFailedException(string message)
             : base($"Failed to ping server: {message}", 4009) { }
+    }
+
+    // 4010: LDAP user not found in directory
+    public class LdapDirectoryUserNotFoundException : LdapFunctionsException
+    {
+        public LdapDirectoryUserNotFoundException(string userName)
+            : base($"User '{userName}' not found in LDAP directory.", 4010) { }
+    }
+
+    // 4011: LDAP group not found in directory
+    public class LdapDirectoryGroupNotFoundException : LdapFunctionsException
+    {
+        public LdapDirectoryGroupNotFoundException(string groupName)
+            : base($"Group '{groupName}' not found in LDAP directory.", 4011) { }
+    }
+
+    // 4012: LDAP directory query failure
+    public class LdapDirectoryQueryException : LdapFunctionsException
+    {
+        public LdapDirectoryQueryException(string message)
+            : base($"LDAP directory query failed: {message}", 4012) { }
     }
 }

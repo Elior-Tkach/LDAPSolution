@@ -30,24 +30,23 @@ namespace LDAP_DLL
             var response = new LdapResponse();
             try
             {
-                // Get server details using PingServerSimple
-                string pingInfo;
-                bool pingSuccess = LDAP_Functions.PingServerSimple(host, out pingInfo);
-
-                if (!pingSuccess)
-                {
-                    throw new LdapPingFailedException(pingInfo);
-                }
-
-                // Parse pingInfo for IPs and HostName
                 string ips = "N/A";
                 string hostName = "N/A";
-                var ipIndex = pingInfo.IndexOf("IPs:");
-                var hostIndex = pingInfo.IndexOf("HostName:");
-                if (ipIndex >= 0 && hostIndex > ipIndex)
+                try
                 {
-                    ips = pingInfo.Substring(ipIndex + 4, hostIndex - (ipIndex + 4)).Trim(' ', ',');
-                    hostName = pingInfo.Substring(hostIndex + 9).Trim();
+                    var hostEntry = System.Net.Dns.GetHostEntry(host);
+                    hostName = hostEntry.HostName;
+                    ips = hostEntry.AddressList.Length > 0
+                        ? string.Join(", ", hostEntry.AddressList.Select(a => a.ToString()))
+                        : "N/A";
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.ErrorMessage = $"Failed to resolve host or IPs: {ex.Message}";
+                    response.ErrorNumber = 4020; 
+                    logger.Error(ex, $"RecordLdapServerDetailsSimple exception: {response.ErrorMessage}");
+                    return response;
                 }
 
                 string iniPath = GetIniPath();
@@ -252,12 +251,15 @@ namespace LDAP_DLL
         public static LdapResponse GetUser(string ldapPath, string userName, string username, string password)
         {
             var response = new LdapResponse();
-            string errorMessage;
-            response.ResultString = LDAP_Functions.GetUserByUserNameSimple(ldapPath, out errorMessage, userName, username, password);
-            if (!string.IsNullOrEmpty(errorMessage))
+            try
+            {
+                response.ResultArray = LDAP_Functions.GetUserByUserNameSimple(ldapPath, userName, username, password);
+            }
+            catch (LdapFunctionsException ex)
             {
                 response.Success = false;
-                response.ErrorMessage = errorMessage;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
             }
             return response;
         }
@@ -265,12 +267,15 @@ namespace LDAP_DLL
         public static LdapResponse GetGroup(string ldapPath, string groupName, string username, string password)
         {
             var response = new LdapResponse();
-            string errorMessage;
-            response.ResultString = LDAP_Functions.GetGroupByNameSimple(ldapPath, out errorMessage, groupName, username, password);
-            if (!string.IsNullOrEmpty(errorMessage))
+            try
+            {
+                response.ResultString = LDAP_Functions.GetGroupByNameSimple(ldapPath, groupName, username, password);
+            }
+            catch (LdapFunctionsException ex)
             {
                 response.Success = false;
-                response.ErrorMessage = errorMessage;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
             }
             return response;
         }
@@ -278,12 +283,15 @@ namespace LDAP_DLL
         public static LdapResponse GetAllGroups(string ldapPath, string username, string password)
         {
             var response = new LdapResponse();
-            string errorMessage;
-            response.ResultArray = LDAP_Functions.GetAllLdapGroupsArray(ldapPath, out errorMessage, username, password);
-            if (!string.IsNullOrEmpty(errorMessage))
+            try
+            {
+                response.ResultArray = LDAP_Functions.GetAllLdapGroupsArray(ldapPath, username, password);
+            }
+            catch (LdapFunctionsException ex)
             {
                 response.Success = false;
-                response.ErrorMessage = errorMessage;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
             }
             return response;
         }
@@ -291,12 +299,15 @@ namespace LDAP_DLL
         public static LdapResponse GetUsersInGroup(string ldapPath, string groupName, string username, string password)
         {
             var response = new LdapResponse();
-            string errorMessage;
-            response.ResultArray = LDAP_Functions.GetUsersInGroupArray(ldapPath, out errorMessage, groupName, username, password);
-            if (!string.IsNullOrEmpty(errorMessage))
+            try
+            {
+                response.ResultArray = LDAP_Functions.GetUsersInGroupArray(ldapPath, groupName, username, password);
+            }
+            catch (LdapFunctionsException ex)
             {
                 response.Success = false;
-                response.ErrorMessage = errorMessage;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
             }
             return response;
         }
@@ -304,12 +315,17 @@ namespace LDAP_DLL
         public static LdapResponse TestConnection(string host)
         {
             var response = new LdapResponse();
-            string errorMessage;
-            response.ResultBool = LDAP_Functions.PingServerSimple(host, out errorMessage);
-            if (!response.ResultBool)
+            try
+            {
+                LDAP_Functions.PingServerSimple(host);
+                response.ResultBool = true;
+            }
+            catch (LdapPingFailedException ex)
             {
                 response.Success = false;
-                response.ErrorMessage = errorMessage;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
+                response.ResultBool = false;
             }
             return response;
         }

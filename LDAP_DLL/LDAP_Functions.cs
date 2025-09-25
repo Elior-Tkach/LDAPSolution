@@ -14,7 +14,7 @@ namespace LDAP_DLL
         // -------------------------
         // Basic Ping method
         // -------------------------
-        public static bool PingServerSimple(string host, out string errorMessage)
+        public static bool PingServerSimple(string host)
         {
             logger.Info($"PingServerSimple called with host: {host}");
             try
@@ -41,37 +41,39 @@ namespace LDAP_DLL
                             resolvedHostName = "N/A";
                             resolvedIps = "N/A";
                         }
-
-                        errorMessage = $"Ping succeeded. IPs: {resolvedIps}, HostName: {resolvedHostName}";
-                        logger.Info(errorMessage);
+                        string pingInfo = $"Ping succeeded. IPs: {resolvedIps}, HostName: {resolvedHostName}";
+                        logger.Info(pingInfo);
                         return true;
                     }
                     else
                     {
-                        errorMessage = $"Ping failed: {reply.Status}";
+                        string errorMessage = $"Ping failed: {reply.Status}";
                         logger.Warn(errorMessage);
-                        return false;
+                        throw new LdapPingFailedException(errorMessage);
                     }
                 }
             }
+            catch (LdapPingFailedException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                errorMessage = $"Ping exception: {ex.Message}";
+                string errorMessage = $"Ping exception: {ex.Message}";
                 logger.Error(ex, errorMessage);
-                return false;
+                throw new LdapPingFailedException(errorMessage);
             }
         }
 
         // -------------------------
         // Group & User Queries
         // -------------------------
-        public static string[] GetAllLdapGroupsArray(string ldapPath, out string errorMessage, string username, string password)
+        public static string[] GetAllLdapGroupsArray(string ldapPath, string username, string password)
         {
             logger.Info($"GetAllLdapGroupsArray called with ldapPath: {ldapPath}, username: {username}");
             try
             {
                 var groups = new List<string>();
-                errorMessage = null;
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
                     ldapPath = "LDAP://" + ldapPath;
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
@@ -94,19 +96,17 @@ namespace LDAP_DLL
             }
             catch (Exception ex)
             {
-                errorMessage = ex.Message;
-                logger.Error(ex, $"GetAllLdapGroupsArray failed: {errorMessage}");
-                return new string[0];
+                logger.Error(ex, $"GetAllLdapGroupsArray failed: {ex.Message}");
+                throw new LdapDirectoryQueryException(ex.Message);
             }
         }
 
-        public static string[] GetUsersInGroupArray(string ldapPath, out string errorMessage, string groupName, string username, string password)
+        public static string[] GetUsersInGroupArray(string ldapPath, string groupName, string username, string password)
         {
             logger.Info($"GetUsersInGroupArray called with ldapPath: {ldapPath}, groupName: {groupName}, username: {username}");
             try
             {
                 var users = new List<string>();
-                errorMessage = null;
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
                     ldapPath = "LDAP://" + ldapPath;
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
@@ -117,9 +117,7 @@ namespace LDAP_DLL
                     var result = searcher.FindOne();
                     if (result == null)
                     {
-                        errorMessage = $"Group '{groupName}' not found.";
-                        logger.Warn(errorMessage);
-                        return users.ToArray();
+                        throw new LdapDirectoryGroupNotFoundException(groupName);
                     }
                     if (result.Properties.Contains("member"))
                     {
@@ -138,21 +136,23 @@ namespace LDAP_DLL
                 logger.Info($"Found {users.Count} users in group {groupName}.");
                 return users.ToArray();
             }
+            catch (LdapDirectoryGroupNotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                errorMessage = ex.Message;
-                logger.Error(ex, $"GetUsersInGroupArray failed: {errorMessage}");
-                return new string[0];
+                logger.Error(ex, $"GetUsersInGroupArray failed: {ex.Message}");
+                throw new LdapDirectoryQueryException(ex.Message);
             }
         }
 
-        public static string[] GetGroupsForUserArray(string ldapPath, out string errorMessage, string userName, string username, string password)
+        public static string[] GetGroupsForUserArray(string ldapPath, string userName, string username, string password)
         {
             logger.Info($"GetGroupsForUserArray called with ldapPath: {ldapPath}, userName: {userName}, username: {username}");
             try
             {
                 var groups = new List<string>();
-                errorMessage = null;
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
                     ldapPath = "LDAP://" + ldapPath;
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
@@ -163,9 +163,7 @@ namespace LDAP_DLL
                     var result = searcher.FindOne();
                     if (result == null)
                     {
-                        errorMessage = $"User '{userName}' not found.";
-                        logger.Warn(errorMessage);
-                        return groups.ToArray();
+                        throw new LdapDirectoryUserNotFoundException(userName);
                     }
                     if (result.Properties.Contains("memberOf"))
                     {
@@ -193,23 +191,26 @@ namespace LDAP_DLL
                 logger.Info($"Found {groups.Count} groups for user {userName}.");
                 return groups.ToArray();
             }
+            catch (LdapDirectoryUserNotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                errorMessage = ex.Message;
-                logger.Error(ex, $"GetGroupsForUserArray failed: {errorMessage}");
-                return new string[0];
+                logger.Error(ex, $"GetGroupsForUserArray failed: {ex.Message}");
+                throw new LdapDirectoryQueryException(ex.Message);
             }
         }
 
         // -------------------------
         // Lookup by Username/Group
         // -------------------------
-        public static string GetUserByUserNameSimple(string ldapPath, out string errorMessage, string userName, string username, string password)
+        public static string[] GetUserByUserNameSimple(string ldapPath, string userName, string username, string password)
         {
             logger.Info($"GetUserByUserNameSimple called with ldapPath: {ldapPath}, userName: {userName}, username: {username}");
+            var userNames = new List<string>();
             try
             {
-                errorMessage = null;
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
                     ldapPath = "LDAP://" + ldapPath;
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
@@ -217,42 +218,40 @@ namespace LDAP_DLL
                 {
                     searcher.Filter = $"(&(objectClass=user)(|(sAMAccountName=*{userName}*)(givenName=*{userName}*)(sn=*{userName}*)(cn=*{userName}*)(displayName=*{userName}*)))";
                     searcher.PropertiesToLoad.Add("sAMAccountName");
-                    searcher.PropertiesToLoad.Add("displayName");
-                    searcher.PropertiesToLoad.Add("mail");
-                    searcher.PropertiesToLoad.Add("givenName");
-                    searcher.PropertiesToLoad.Add("sn");
-                    var result = searcher.FindOne();
-                    if (result == null)
+                    var results = searcher.FindAll();
+                    if (results == null || results.Count == 0)
                     {
-                        errorMessage = $"User '{userName}' not found.";
-                        logger.Warn(errorMessage);
-                        return string.Empty;
+                        throw new LdapDirectoryUserNotFoundException(userName);
                     }
-                    var userEntry = result.GetDirectoryEntry();
-                    var sb = new StringBuilder();
-                    sb.Append("sAMAccountName=").Append(GetProperty(userEntry, "sAMAccountName")).Append(";");
-                    sb.Append("displayName=").Append(GetProperty(userEntry, "displayName")).Append(";");
-                    sb.Append("mail=").Append(GetProperty(userEntry, "mail")).Append(";");
-                    sb.Append("givenName=").Append(GetProperty(userEntry, "givenName")).Append(";");
-                    sb.Append("sn=").Append(GetProperty(userEntry, "sn"));
-                    logger.Info($"User found: {sb.ToString()}");
-                    return sb.ToString();
+                    foreach (SearchResult result in results)
+                    {
+                        var userEntry = result.GetDirectoryEntry();
+                        var sAMAccountName = GetProperty(userEntry, "sAMAccountName");
+                        if (!string.IsNullOrEmpty(sAMAccountName))
+                        {
+                            userNames.Add(sAMAccountName);
+                        }
+                    }
+                    logger.Info($"Users found: {string.Join(", ", userNames)}");
+                    return userNames.ToArray();
                 }
+            }
+            catch (LdapDirectoryUserNotFoundException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                errorMessage = ex.Message;
-                logger.Error(ex, $"GetUserByUserNameSimple failed: {errorMessage}");
-                return string.Empty;
+                logger.Error(ex, $"GetUserByUserNameSimple failed: {ex.Message}");
+                throw new LdapDirectoryQueryException(ex.Message);
             }
         }
 
-        public static string GetGroupByNameSimple(string ldapPath, out string errorMessage, string groupName, string username, string password)
+        public static string GetGroupByNameSimple(string ldapPath, string groupName, string username, string password)
         {
             logger.Info($"GetGroupByNameSimple called with ldapPath: {ldapPath}, groupName: {groupName}, username: {username}");
             try
             {
-                errorMessage = null;
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
                     ldapPath = "LDAP://" + ldapPath;
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
@@ -263,9 +262,7 @@ namespace LDAP_DLL
                     var result = searcher.FindOne();
                     if (result == null)
                     {
-                        errorMessage = $"Group '{groupName}' not found.";
-                        logger.Warn(errorMessage);
-                        return string.Empty;
+                        throw new LdapDirectoryGroupNotFoundException(groupName);
                     }
                     var groupEntry = result.GetDirectoryEntry();
                     var sb = new StringBuilder();
@@ -274,11 +271,14 @@ namespace LDAP_DLL
                     return sb.ToString();
                 }
             }
+            catch (LdapDirectoryGroupNotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                errorMessage = ex.Message;
-                logger.Error(ex, $"GetGroupByNameSimple failed: {errorMessage}");
-                return string.Empty;
+                logger.Error(ex, $"GetGroupByNameSimple failed: {ex.Message}");
+                throw new LdapDirectoryQueryException(ex.Message);
             }
         }
 

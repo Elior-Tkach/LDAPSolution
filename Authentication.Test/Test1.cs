@@ -38,45 +38,44 @@ namespace LDAP_DLL.Tests
         public void IsUserRegistered_ReturnsTrue_WhenUserExistsWithPermission()
         {
             string error;
-            var result = LDAP_Authentication.IsUserRegistered("jdoe", "A", out error);
+            var result = LDAP_Authentication.IsUserRegistered("jdoe", "A");
             Assert.IsTrue(result, "Should return true for user with correct permission");
-            Assert.IsTrue(string.IsNullOrEmpty(error), "Error should be null or empty for valid user");
         }
 
         [TestMethod]
         public void IsUserRegistered_ReturnsFalse_WhenUserDoesNotExist()
         {
             string error;
-            var result = LDAP_Authentication.IsUserRegistered("notfound", "A", out error);
+            var result = LDAP_Authentication.IsUserRegistered("notfound", "A");
             Assert.IsFalse(result, "Should return false for non-existent user");
-            Assert.AreEqual("User not found in INI file.", error);
         }
 
         [TestMethod]
         public void IsUserRegistered_ReturnsFalse_WhenPermissionDoesNotMatch()
         {
-            string error;
-            var result = LDAP_Authentication.IsUserRegistered("jdoe", "O", out error);
+            var result = LDAP_Authentication.IsUserRegistered("jdoe", "O");
             Assert.IsFalse(result, "Should return false for user with wrong permission");
-            Assert.IsTrue(error.Contains("permission type does not match"));
         }
 
         [TestMethod]
         public void IsUserInRegisteredGroup_ReturnsTrue_WhenGroupExistsWithPermission()
         {
             string error;
-            var result = LDAP_Authentication.IsUserInRegisteredGroup("Avraham", "Avraham", "Acx2020", "O", out error);
+            var result = LDAP_Authentication.IsUserInRegisteredGroup("Avraham", "Avraham", "Acx2020", "O");
             Assert.IsTrue(result, "Should return true for group with correct permission");
-            Assert.IsTrue(string.IsNullOrEmpty(error), "Error should be null or empty for valid group");
         }
 
         [TestMethod]
         public void AuthenticateUser_ReturnsFalse_WhenUserAndGroupNotFound()
         {
-            var result = LDAP_Authentication.AuthenticateUser("Avraham", "Acx2020", "A");
-            Assert.IsFalse(result.ResultBool, "Should return false for non-existent user");
-            Assert.IsFalse(result.Success, "Operation should not be successful for non-existent user");
-            Assert.IsFalse(string.IsNullOrEmpty(result.ErrorMessage), "Error should not be null or empty when authentication fails");
+            var response = LDAP_Authentication.AuthenticateUser("Avraham", "Acx2020", "A");
+            Assert.IsFalse(response.ResultBool, "Should return false for non-existent user");
+            Assert.IsFalse(response.Success, "Operation should not be successful for non-existent user");
+            Assert.IsFalse(string.IsNullOrEmpty(response.ErrorMessage), "Error should not be null or empty when authentication fails");
+            TestContext.WriteLine($"ResultBool: {response.ResultBool}");
+            TestContext.WriteLine($"Success: {response.Success}");
+            TestContext.WriteLine($"ErrorMessage: {response.ErrorMessage}");
+            TestContext.WriteLine($"ErrorNumber: {response.ErrorNumber}");
         }
 
         [TestMethod]
@@ -89,14 +88,7 @@ namespace LDAP_DLL.Tests
             string password = "Acx2020"; // LDAP bind password
 
             // Act
-            string error;
-            var groups = LDAP_DLL.LDAP_Functions.GetGroupsForUserArray(ldapPath, out error, userName, username, password);
-
-            // Assert
-            if (!string.IsNullOrEmpty(error))
-            {
-                Assert.Fail("LDAP error: " + error);
-            }
+            var groups = LDAP_DLL.LDAP_Functions.GetGroupsForUserArray(ldapPath, userName, username, password);
             Assert.IsNotNull(groups, "Groups array should not be null");
             Assert.IsTrue(groups.Length > 0, "User should belong to at least one group");
             TestContext.WriteLine("Groups: " + string.Join(", ", groups)); // Use instance property
