@@ -9,23 +9,27 @@
 
         <!-- Title -->
 
-        <TextBlock Text="Enter IP address/ host name:" Canvas.Left="48" Canvas.Top="100" Height="56" Width="329" FontSize="26" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <TextBox x:Name="HostTextBox" Width="250" FontSize="24" Canvas.Left="394" Canvas.Top="100" Height="46" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <TextBlock Text="Enter IP address/ host name:" Canvas.Left="48" Canvas.Top="85" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <TextBox x:Name="HostTextBox" Width="250" FontSize="24" Canvas.Left="394" Canvas.Top="85" Height="46" HorizontalAlignment="Center" VerticalAlignment="Top"/>
 
-        <Button x:Name="TestConnectionBtn" Content="Test connection" Width="191" FontSize="21" Canvas.Left="500" Canvas.Top="241" Click="TestConnectionBtn_Click" Height="32" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <Button x:Name="SaveServerBtn" Content="Save the server" Width="172" FontSize="21" Canvas.Left="303" Canvas.Top="242" Click="SaveServerBtn_Click" Height="31" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Button x:Name="TestConnectionBtn" Content="Test connection" Width="172" FontSize="21" Canvas.Left="712" Canvas.Top="76" Click="TestConnectionBtn_Click" Height="32" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Button x:Name="SaveServerBtn" Content="Save the server" Width="172" FontSize="21" Canvas.Left="712" Canvas.Top="116" Click="SaveServerBtn_Click" Height="31" HorizontalAlignment="Center" VerticalAlignment="Top"/>
 
-        <Button x:Name="ContinueBtn" Content="Continue to setup" Width="228" FontSize="23" Canvas.Left="416" Canvas.Top="171" Click="ContinueBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="39"/>
+        <Button x:Name="ContinueBtn" Content="Continue to setup" Width="228" FontSize="23" Canvas.Left="684" Canvas.Top="213" Click="ContinueBtn_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Height="40"/>
         <TextBox x:Name="ErrorTextBox"
-                 Width="676"
+                 Width="722"
                  FontSize="18"
                  IsReadOnly="True"
-                 Canvas.Left="235"
-                 Canvas.Top="292"
-                 Height="39"
-                 HorizontalAlignment="Left"
+                 Canvas.Left="212"
+                 Canvas.Top="278"
+                 Height="54"
+                 HorizontalAlignment="Center"
                  VerticalAlignment="Top"
                  BorderThickness="0"
                  Background="Transparent"/>
+        <TextBlock Text="Enter password:" Canvas.Left="48" Canvas.Top="211" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <PasswordBox x:Name="PasswordTextBox" Width="250" FontSize="24" Canvas.Left="394" Canvas.Top="211" Height="44" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <TextBlock Text="Enter username:" Canvas.Left="48" Canvas.Top="151" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <TextBox x:Name="UsernameTextBox" Width="250" FontSize="24" Canvas.Left="394" Canvas.Top="151" Height="46" HorizontalAlignment="Center" VerticalAlignment="Top"/>
     </Canvas>
 </Window>

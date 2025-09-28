@@ -40,9 +40,21 @@ namespace Setup_Application
 
         private void ContinueBtn_Click(object sender, RoutedEventArgs e)
         {
-            var setupPage = new SetupPage();
-            setupPage.Show();
-            this.Close();
+            var host = HostTextBox.Text;
+            var username = UsernameTextBox.Text;
+            var password = PasswordTextBox.Password;    
+            var response = LDAP_Setup.TestLdapCredentials(host,username,password);
+            if (response.Success)
+            {
+                var setupPage = new SetupPage(host, username, password);
+                setupPage.Show();
+                this.Close();
+            }
+            else
+            {
+                ErrorTextBox.Text = response.ErrorMessage;
+            }
+
         }
     }
 }

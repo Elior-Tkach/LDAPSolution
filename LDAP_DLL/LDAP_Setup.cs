@@ -329,5 +329,22 @@ namespace LDAP_DLL
             }
             return response;
         }
+
+        public static LdapResponse TestLdapCredentials(string ldapPath, string username, string password)
+        {
+            var response = new LdapResponse();
+            try
+            {
+                LDAP_Functions.TestLdapConnection(ldapPath, username, password);
+                response.Success = true;
+            }
+            catch (LdapDirectoryQueryException ex)
+            {
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
+            }
+            return response;
+        }
     }
 }

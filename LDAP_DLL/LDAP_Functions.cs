@@ -65,6 +65,23 @@ namespace LDAP_DLL
             }
         }
 
+        public static void TestLdapConnection(string ldapPath, string username, string password)
+        {
+            try
+            {
+                if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
+                    ldapPath = "LDAP://" + ldapPath;
+                using (var entry = new DirectoryEntry(ldapPath, username, password))
+                {
+                    // Force authentication by accessing a property
+                    var nativeObj = entry.NativeObject;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new LdapDirectoryQueryException(ex.Message);
+            }
+        } 
         // -------------------------
         // Group & User Queries
         // -------------------------
@@ -266,7 +283,7 @@ namespace LDAP_DLL
                     }
                     var groupEntry = result.GetDirectoryEntry();
                     var sb = new StringBuilder();
-                    sb.Append("sAMAccountName=").Append(GetProperty(groupEntry, "sAMAccountName"));
+                    sb.Append(GetProperty(groupEntry, "sAMAccountName"));
                     logger.Info($"Group found: {sb.ToString()}");
                     return sb.ToString();
                 }
@@ -291,5 +308,6 @@ namespace LDAP_DLL
                 return entry.Properties[propertyName][0]?.ToString() ?? string.Empty;
             return string.Empty;
         }
+
     }
 }
