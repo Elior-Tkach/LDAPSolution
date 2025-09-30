@@ -12,12 +12,20 @@ namespace Setup_Application
         private string selectedName = "";
         private string selectedType = "U"; // U=user, G=group
 
+        // Add a mode flag to distinguish between group search and user-in-group search
+        private enum GroupInputMode { None, FindGroup, UsersInGroup }
+        private GroupInputMode groupInputMode = GroupInputMode.None;
+
         public SetupPage(string host, string username, string password)
         {
             InitializeComponent();
             this.host = host;
             this.username = username;
             this.password = password;
+
+            // Attach event handlers for selection
+            UserSelectListBox.SelectionChanged += UserSelectListBox_SelectionChanged;
+            GroupListBox.SelectionChanged += GroupListBox_SelectionChanged;
         }
 
         private void HideAllDynamicControls()
@@ -29,13 +37,21 @@ namespace Setup_Application
             GroupListBox.Visibility = Visibility.Collapsed;
         }
 
+        private void HidePermissionControls()
+        {
+            OperatorRadio.Visibility = Visibility.Collapsed;
+            AdminRadio.Visibility = Visibility.Collapsed;
+            SaveBtn.Visibility = Visibility.Collapsed;
+        }
+
         private void FindUserBtn_Click(object sender, RoutedEventArgs e)
         {
             HideAllDynamicControls();
             UserNamePromptTextBlock.Visibility = Visibility.Visible;
             UserNameInputTextBox.Visibility = Visibility.Visible;
-            SelectedTextBox.Visibility = Visibility.Collapsed; // Hide SelectedTextBox
-            UserSelectListBox.Visibility = Visibility.Collapsed;// Hide UserSelectListBox
+            SelectedTextBox.Visibility = Visibility.Collapsed;
+            UserSelectListBox.Visibility = Visibility.Collapsed;
+            HidePermissionControls();
         }
 
         private void FindGroupBtn_Click(object sender, RoutedEventArgs e)
@@ -43,8 +59,11 @@ namespace Setup_Application
             HideAllDynamicControls();
             GroupNamePromptTextBlock.Visibility = Visibility.Visible;
             GroupNameInputTextBox.Visibility = Visibility.Visible;
-            SelectedTextBox.Visibility = Visibility.Collapsed; // Hide SelectedTextBox
-            UserSelectListBox.Visibility = Visibility.Collapsed;// Hide UserSelectListBox
+            SelectedTextBox.Visibility = Visibility.Collapsed;
+            UserSelectListBox.Visibility = Visibility.Collapsed;
+            GroupNameInputTextBox.Text = string.Empty;
+            HidePermissionControls();
+            groupInputMode = GroupInputMode.FindGroup;
         }
 
         private void ChooseUserFromGroupBtn_Click(object sender, RoutedEventArgs e)
@@ -52,16 +71,33 @@ namespace Setup_Application
             HideAllDynamicControls();
             GroupNamePromptTextBlock.Visibility = Visibility.Visible;
             GroupNameInputTextBox.Visibility = Visibility.Visible;
-            SelectedTextBox.Visibility = Visibility.Collapsed; // Hide SelectedTextBox
-            UserSelectListBox.Visibility = Visibility.Collapsed;// Hide UserSelectListBox
+            SelectedTextBox.Visibility = Visibility.Collapsed;
+            UserSelectListBox.Visibility = Visibility.Collapsed;
+            GroupListBox.Visibility = Visibility.Collapsed;
+            GroupNameInputTextBox.Text = string.Empty;
+            HidePermissionControls();
+            groupInputMode = GroupInputMode.UsersInGroup;
         }
 
         private void ChooseGroupFromListBtn_Click(object sender, RoutedEventArgs e)
         {
             HideAllDynamicControls();
-            GroupListBox.Visibility = Visibility.Visible;
-            SelectedTextBox.Visibility = Visibility.Collapsed; // Hide SelectedTextBox
-            UserSelectListBox.Visibility = Visibility.Collapsed;// Hide UserSelectListBox
+            SelectedTextBox.Visibility = Visibility.Collapsed;
+            UserSelectListBox.Visibility = Visibility.Collapsed;
+
+            // Get all groups from LDAP
+            var response = LDAP_Setup.GetAllGroups(host, username, password);
+            if (response.ResultArray != null && response.ResultArray.Length > 0)
+            {
+                GroupListBox.ItemsSource = response.ResultArray;
+                GroupListBox.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                GroupListBox.ItemsSource = null;
+                GroupListBox.Visibility = Visibility.Visible;
+            }
+            HidePermissionControls();
         }
 
         private void UserNameInputTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -101,18 +137,37 @@ namespace Setup_Application
                 var groupName = GroupNameInputTextBox.Text;
                 if (!string.IsNullOrWhiteSpace(groupName))
                 {
-                    var response = LDAP_Setup.GetGroup(host, groupName, username, password);
-                    if (!string.IsNullOrEmpty(response.ResultString))
+                    if (groupInputMode == GroupInputMode.UsersInGroup)
                     {
-                        UserSelectListBox.ItemsSource = new[] { response.ResultString };
-                        UserSelectListBox.Visibility = Visibility.Visible;
-                        SelectedTextBox.Visibility = Visibility.Collapsed;
+                        var response = LDAP_Setup.GetUsersInGroup(host, groupName, username, password);
+                        if (response.ResultArray != null && response.ResultArray.Length > 0)
+                        {
+                            UserSelectListBox.ItemsSource = response.ResultArray;
+                            UserSelectListBox.Visibility = Visibility.Visible;
+                            SelectedTextBox.Visibility = Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            UserSelectListBox.Visibility = Visibility.Collapsed;
+                            SelectedTextBox.Text = $"No users found in group: {groupName}";
+                            SelectedTextBox.Visibility = Visibility.Visible;
+                        }
                     }
-                    else
+                    else if (groupInputMode == GroupInputMode.FindGroup)
                     {
-                        UserSelectListBox.Visibility = Visibility.Collapsed;
-                        SelectedTextBox.Text = $"Group not found: {groupName}";
-                        SelectedTextBox.Visibility = Visibility.Visible;
+                        var response = LDAP_Setup.GetGroup(host, groupName, username, password);
+                        if (!string.IsNullOrEmpty(response.ResultString))
+                        {
+                            UserSelectListBox.ItemsSource = new[] { response.ResultString };
+                            UserSelectListBox.Visibility = Visibility.Visible;
+                            SelectedTextBox.Visibility = Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            SelectedTextBox.Text = $"Group not found: {groupName}";
+                            SelectedTextBox.Visibility = Visibility.Visible;
+                            UserSelectListBox.Visibility = Visibility.Collapsed;
+                        }
                     }
                 }
                 else
@@ -130,6 +185,7 @@ namespace Setup_Application
             LDAP_Setup.ClearLdapPermissions();
             SelectedTextBox.Text = "";
             HideAllDynamicControls();
+            HidePermissionControls();
         }
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
@@ -159,6 +215,30 @@ namespace Setup_Application
             var connectionWindow = new ConnectionWithServer();
             connectionWindow.Show();
             this.Close();
+        }
+
+        private void UserSelectListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (UserSelectListBox.SelectedItem != null)
+            {
+                selectedName = UserSelectListBox.SelectedItem.ToString();
+                selectedType = "U";
+                OperatorRadio.Visibility = Visibility.Visible;
+                AdminRadio.Visibility = Visibility.Visible;
+                SaveBtn.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void GroupListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (GroupListBox.SelectedItem != null)
+            {
+                selectedName = GroupListBox.SelectedItem.ToString();
+                selectedType = "G";
+                OperatorRadio.Visibility = Visibility.Visible;
+                AdminRadio.Visibility = Visibility.Visible;
+                SaveBtn.Visibility = Visibility.Visible;
+            }
         }
     }
 }

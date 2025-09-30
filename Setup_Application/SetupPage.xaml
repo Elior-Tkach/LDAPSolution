@@ -14,21 +14,22 @@
         <Button Content="Clear all users and groups" Width="241" Canvas.Left="706" Canvas.Top="58" Click="ClearAllBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Center" Height="40" FontSize="18"/>
         <Button Content="Return to previous page" Width="194" Canvas.Left="27" Canvas.Top="71" Click="ReturnToPreviousPageBtn_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Height="27" FontSize="15"/>
 
-        <RadioButton x:Name="OperatorRadio" Content="Operator" GroupName="Role" Canvas.Left="634" Canvas.Top="269" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18"/>
-        <RadioButton x:Name="AdminRadio" Content="Administrator" GroupName="Role" Canvas.Left="740" Canvas.Top="269" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18"/>
+        <RadioButton x:Name="OperatorRadio" Content="Operator" GroupName="Role" Visibility="Collapsed" Canvas.Left="685" Canvas.Top="225" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="18" />
+        <RadioButton x:Name="AdminRadio" Content="Administrator" GroupName="Role" Visibility="Collapsed" Canvas.Left="791" Canvas.Top="225" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="18" />
 
-        <TextBox x:Name="SelectedTextBox" Width="233" IsReadOnly="True" Canvas.Left="337" Canvas.Top="264" Visibility="Collapsed" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center" Height="28" BorderThickness="0" Background="Transparent" />
-        <Button Content="Save" Width="121" Canvas.Left="683" Canvas.Top="336" Click="SaveBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="31" FontSize="20"/>
+        <TextBox x:Name="SelectedTextBox" Width="292" IsReadOnly="True" Canvas.Left="337" Canvas.Top="264" Visibility="Collapsed" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center" Height="28" BorderThickness="0" Background="Transparent" />
+        <Button Content="Save" x:Name="SaveBtn" Width="121" Canvas.Left="734" Visibility="Collapsed" Canvas.Top="292" Click="SaveBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Center" Height="31" FontSize="20" 
+                />
 
 
         <!-- Dynamic Controls -->
         <TextBlock x:Name="UserNamePromptTextBlock" Text="Enter user name:" Canvas.Left="188" Canvas.Top="224" Visibility="Collapsed" FontSize="18" Height="56" Width="329"/>
-        <TextBox x:Name="UserNameInputTextBox" Width="233" Height="33" Canvas.Left="337" Canvas.Top="225" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"  KeyDown="UserNameInputTextBox_KeyDown" FontSize="17"/>
+        <TextBox x:Name="UserNameInputTextBox" Width="292" Height="33" Canvas.Left="337" Canvas.Top="225" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"  KeyDown="UserNameInputTextBox_KeyDown" FontSize="17"/>
 
         <TextBlock x:Name="GroupNamePromptTextBlock" Text="Enter group name:" Canvas.Left="173" Canvas.Top="225" Visibility="Collapsed" FontSize="18" Height="56" Width="329" HorizontalAlignment="Left" VerticalAlignment="Center" />
-        <TextBox x:Name="GroupNameInputTextBox" Width="232" Height="33" Canvas.Left="338" Canvas.Top="225" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"  KeyDown="GroupNameInputTextBox_KeyDown" FontSize="17" TextChanged="GroupNameInputTextBox_TextChanged"/>
+        <TextBox x:Name="GroupNameInputTextBox" Width="291" Height="33" Canvas.Left="338" Canvas.Top="225" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"  KeyDown="GroupNameInputTextBox_KeyDown" FontSize="17" TextChanged="GroupNameInputTextBox_TextChanged"/>
 
-        <ListBox x:Name="GroupListBox" Width="233" Height="79" Canvas.Left="337" Canvas.Top="263" Visibility="Collapsed" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <ListBox x:Name="UserSelectListBox" Width="232" Height="79" Canvas.Left="338" Canvas.Top="263" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16"/>
+        <ListBox x:Name="GroupListBox" Width="292" Height="183" Canvas.Left="337" Canvas.Top="225" Visibility="Collapsed" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <ListBox x:Name="UserSelectListBox" Width="291" Height="183" Canvas.Left="338" Canvas.Top="263" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16"/>
     </Canvas>
 </Window>
