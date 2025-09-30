@@ -23,9 +23,10 @@ namespace Setup_Application
             this.username = username;
             this.password = password;
 
-            // Attach event handlers for selection
             UserSelectListBox.SelectionChanged += UserSelectListBox_SelectionChanged;
             GroupListBox.SelectionChanged += GroupListBox_SelectionChanged;
+            OperatorRadio.Checked += PermissionRadio_Checked;
+            AdminRadio.Checked += PermissionRadio_Checked;
         }
 
         private void HideAllDynamicControls()
@@ -87,6 +88,13 @@ namespace Setup_Application
 
             // Get all groups from LDAP
             var response = LDAP_Setup.GetAllGroups(host, username, password);
+            if (!string.IsNullOrEmpty(response.ErrorMessage))
+            {
+                SelectedTextBox.Text = response.ErrorMessage;
+                SelectedTextBox.Visibility = Visibility.Visible;
+                GroupListBox.Visibility = Visibility.Collapsed;
+                return;
+            }
             if (response.ResultArray != null && response.ResultArray.Length > 0)
             {
                 GroupListBox.ItemsSource = response.ResultArray;
@@ -108,6 +116,13 @@ namespace Setup_Application
                 if (!string.IsNullOrWhiteSpace(userName))
                 {
                     var response = LDAP_Setup.GetUser(host, userName, username, password);
+                    if (!string.IsNullOrEmpty(response.ErrorMessage))
+                    {
+                        SelectedTextBox.Text = response.ErrorMessage;
+                        SelectedTextBox.Visibility = Visibility.Visible;
+                        UserSelectListBox.Visibility = Visibility.Collapsed;
+                        return;
+                    }
                     if (response.ResultArray != null && response.ResultArray.Length > 0)
                     {
                         UserSelectListBox.ItemsSource = response.ResultArray;
@@ -140,6 +155,13 @@ namespace Setup_Application
                     if (groupInputMode == GroupInputMode.UsersInGroup)
                     {
                         var response = LDAP_Setup.GetUsersInGroup(host, groupName, username, password);
+                        if (!string.IsNullOrEmpty(response.ErrorMessage))
+                        {
+                            SelectedTextBox.Text = response.ErrorMessage;
+                            SelectedTextBox.Visibility = Visibility.Visible;
+                            UserSelectListBox.Visibility = Visibility.Collapsed;
+                            return;
+                        }
                         if (response.ResultArray != null && response.ResultArray.Length > 0)
                         {
                             UserSelectListBox.ItemsSource = response.ResultArray;
@@ -156,6 +178,13 @@ namespace Setup_Application
                     else if (groupInputMode == GroupInputMode.FindGroup)
                     {
                         var response = LDAP_Setup.GetGroup(host, groupName, username, password);
+                        if (!string.IsNullOrEmpty(response.ErrorMessage))
+                        {
+                            SelectedTextBox.Text = response.ErrorMessage;
+                            SelectedTextBox.Visibility = Visibility.Visible;
+                            UserSelectListBox.Visibility = Visibility.Collapsed;
+                            return;
+                        }
                         if (!string.IsNullOrEmpty(response.ResultString))
                         {
                             UserSelectListBox.ItemsSource = new[] { response.ResultString };
@@ -179,10 +208,15 @@ namespace Setup_Application
             }
         }
 
-
         private void ClearAllBtn_Click(object sender, RoutedEventArgs e)
         {
-            LDAP_Setup.ClearLdapPermissions();
+            var response = LDAP_Setup.ClearLdapPermissions();
+            if (!string.IsNullOrEmpty(response.ErrorMessage))
+            {
+                SelectedTextBox.Text = response.ErrorMessage;
+                SelectedTextBox.Visibility = Visibility.Visible;
+                return;
+            }
             SelectedTextBox.Text = "";
             HideAllDynamicControls();
             HidePermissionControls();
@@ -198,6 +232,14 @@ namespace Setup_Application
 
             string permission = OperatorRadio.IsChecked == true ? "O" : "A";
             var response = LDAP_Setup.SaveLdapPermission(selectedName, selectedType, permission);
+
+            if (!string.IsNullOrEmpty(response.ErrorMessage))
+            {
+                SelectedTextBox.Text = response.ErrorMessage;
+                SelectedTextBox.Visibility = Visibility.Visible;
+                MessageBox.Show("Error: " + response.ErrorMessage);
+                return;
+            }
 
             if (response.Success)
                 MessageBox.Show("Permission saved successfully.");
@@ -222,10 +264,15 @@ namespace Setup_Application
             if (UserSelectListBox.SelectedItem != null)
             {
                 selectedName = UserSelectListBox.SelectedItem.ToString();
-                selectedType = "U";
+                if (groupInputMode == GroupInputMode.FindGroup)
+                    selectedType = "G";
+                else
+                    selectedType = "U";
                 OperatorRadio.Visibility = Visibility.Visible;
                 AdminRadio.Visibility = Visibility.Visible;
-                SaveBtn.Visibility = Visibility.Visible;
+                OperatorRadio.IsChecked = false; // Deselect radio buttons
+                AdminRadio.IsChecked = false;
+                SaveBtn.Visibility = Visibility.Collapsed; // Hide until permission selected
             }
         }
 
@@ -237,8 +284,15 @@ namespace Setup_Application
                 selectedType = "G";
                 OperatorRadio.Visibility = Visibility.Visible;
                 AdminRadio.Visibility = Visibility.Visible;
-                SaveBtn.Visibility = Visibility.Visible;
+                OperatorRadio.IsChecked = false; // Deselect radio buttons
+                AdminRadio.IsChecked = false;
+                SaveBtn.Visibility = Visibility.Collapsed; // Hide until permission selected
             }
+        }
+
+        private void PermissionRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            SaveBtn.Visibility = Visibility.Visible;
         }
     }
 }
