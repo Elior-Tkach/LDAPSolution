@@ -346,5 +346,38 @@ namespace LDAP_DLL
             }
             return response;
         }
+
+        public static LdapResponse GetAllGroupMembers(string ldapPath, string groupName, string username, string password)
+        {
+            var response = new LdapResponse();
+            try
+            {
+                var members = LDAP_Functions.GetAllGroupMembers(ldapPath, groupName, username, password);
+                if (members != null)
+                {
+                    // Convert to string array for ResultArray (format: "Name (Type)")
+                    response.ResultArray = members.Select(m => $"{m.Name} ({m.Type})").ToArray();
+                    response.Success = true;
+                }
+                else
+                {
+                    response.ResultArray = new string[0];
+                    response.Success = true;
+                }
+            }
+            catch (LdapFunctionsException ex)
+            {
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = 4020;
+            }
+            return response;
+        }
     }
 }

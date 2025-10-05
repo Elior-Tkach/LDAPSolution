@@ -309,5 +309,64 @@ namespace LDAP_DLL
             return string.Empty;
         }
 
+        public class LdapGroupMember
+        {
+            public string Name { get; set; }
+            public string Type { get; set; } // "User" or "Group"
+        }
+
+        public static List<LdapGroupMember> GetAllGroupMembers(string ldapPath, string groupName, string username, string password)
+        {
+            var members = new List<LdapGroupMember>();
+            try
+            {
+                if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
+                    ldapPath = "LDAP://" + ldapPath;
+                using (var entry = new DirectoryEntry(ldapPath, username, password))
+                using (var searcher = new DirectorySearcher(entry))
+                {
+                    searcher.Filter = $"(&(objectClass=group)(sAMAccountName={groupName}))";
+                    searcher.PropertiesToLoad.Add("member");
+                    var result = searcher.FindOne();
+                    if (result == null)
+                        throw new LdapDirectoryGroupNotFoundException(groupName);
+
+                    if (result.Properties.Contains("member"))
+                    {
+                        foreach (var memberDn in result.Properties["member"])
+                        {
+                            using (var memberEntry = new DirectoryEntry($"{ldapPath}/{memberDn}", username, password))
+                            {
+                                var objectClass = memberEntry.Properties["objectClass"];
+                                var name = memberEntry.Properties["sAMAccountName"].Value as string;
+                                if (string.IsNullOrEmpty(name))
+                                    name = memberEntry.Properties["cn"].Value as string;
+
+                                string type = "Unknown";
+                                if (objectClass != null)
+                                {
+                                    var classes = objectClass.Cast<object>().Select(c => c.ToString()).ToList();
+                                    if (classes.Contains("user"))
+                                        type = "User";
+                                    else if (classes.Contains("group"))
+                                        type = "Group";
+                                }
+
+                                if (!string.IsNullOrEmpty(name))
+                                {
+                                    members.Add(new LdapGroupMember { Name = name, Type = type });
+                                }
+                            }
+                        }
+                    }
+                }
+                return members;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"GetAllGroupMembers failed: {ex.Message}");
+                throw new LdapDirectoryQueryException(ex.Message);
+            }
+        }
     }
 }

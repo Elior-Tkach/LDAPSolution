@@ -28,7 +28,6 @@ namespace Setup_Application
             this.password = password;
 
             UserSelectListBox.SelectionChanged += UserSelectListBox_SelectionChanged;
-            GroupListBox.SelectionChanged += GroupListBox_SelectionChanged;
             OperatorRadio.Checked += PermissionRadio_Checked;
             AdminRadio.Checked += PermissionRadio_Checked;
         }
@@ -39,7 +38,6 @@ namespace Setup_Application
             UserNameInputTextBox.Visibility = Visibility.Collapsed;
             GroupNamePromptTextBlock.Visibility = Visibility.Collapsed;
             GroupNameInputTextBox.Visibility = Visibility.Collapsed;
-            GroupListBox.Visibility = Visibility.Collapsed;
         }
 
         private void HidePermissionControls()
@@ -49,22 +47,11 @@ namespace Setup_Application
             SaveBtn.Visibility = Visibility.Collapsed;
         }
 
-        private void HideAllTextAndListBoxes()
-        {
-            SelectedTextBox.Visibility = Visibility.Collapsed;
-            UserNameInputTextBox.Visibility = Visibility.Collapsed;
-            GroupNameInputTextBox.Visibility = Visibility.Collapsed;
-            GroupListBox.Visibility = Visibility.Collapsed;
-            UserSelectListBox.Visibility = Visibility.Collapsed;
-            PermissionsListBox.Visibility = Visibility.Collapsed;
-        }
-
         private void HideAllTextAndListBoxesAndTextBlocks()
         {
             SelectedTextBox.Visibility = Visibility.Collapsed;
             UserNameInputTextBox.Visibility = Visibility.Collapsed;
             GroupNameInputTextBox.Visibility = Visibility.Collapsed;
-            GroupListBox.Visibility = Visibility.Collapsed;
             UserSelectListBox.Visibility = Visibility.Collapsed;
             PermissionsListBox.Visibility = Visibility.Collapsed;
             UserNamePromptTextBlock.Visibility = Visibility.Collapsed;
@@ -103,7 +90,6 @@ namespace Setup_Application
             GroupNameInputTextBox.Visibility = Visibility.Visible;
             SelectedTextBox.Visibility = Visibility.Collapsed;
             UserSelectListBox.Visibility = Visibility.Collapsed;
-            GroupListBox.Visibility = Visibility.Collapsed;
             GroupNameInputTextBox.Text = string.Empty;
             HidePermissionControls();
             groupInputMode = GroupInputMode.UsersInGroup;
@@ -115,27 +101,63 @@ namespace Setup_Application
             HideAllDynamicControls();
             SelectedTextBox.Visibility = Visibility.Collapsed;
             UserSelectListBox.Visibility = Visibility.Collapsed;
+            GroupTreeView.Items.Clear();
+            GroupTreeView.Visibility = Visibility.Collapsed;
 
             // Get all groups from LDAP
-            var response = LDAP_Setup.GetAllGroups(host, username, password);
-            if (!string.IsNullOrEmpty(response.ErrorMessage))
+            var groupsResponse = LDAP_Setup.GetAllGroups(host, username, password);
+            if (!string.IsNullOrEmpty(groupsResponse.ErrorMessage))
             {
-                SelectedTextBox.Text = response.ErrorMessage;
+                SelectedTextBox.Text = groupsResponse.ErrorMessage;
                 SelectedTextBox.Visibility = Visibility.Visible;
-                GroupListBox.Visibility = Visibility.Collapsed;
                 return;
             }
-            if (response.ResultArray != null && response.ResultArray.Length > 0)
+
+            if (groupsResponse.ResultArray != null && groupsResponse.ResultArray.Length > 0)
             {
-                GroupListBox.ItemsSource = response.ResultArray;
-                GroupListBox.Visibility = Visibility.Visible;
+                foreach (var groupName in groupsResponse.ResultArray)
+                {
+                    var groupItem = BuildGroupTreeRecursive(groupName);
+                    GroupTreeView.Items.Add(groupItem);
+                }
+                GroupTreeView.Visibility = Visibility.Visible;
             }
             else
             {
-                GroupListBox.ItemsSource = null;
-                GroupListBox.Visibility = Visibility.Visible;
+                GroupTreeView.Items.Clear();
+                GroupTreeView.Visibility = Visibility.Visible;
             }
             HidePermissionControls();
+        }
+
+        // Recursive helper to build group-member hierarchy
+        private TreeViewItem BuildGroupTreeRecursive(string groupName)
+        {
+            var groupItem = new TreeViewItem { Header = groupName };
+            var membersResponse = LDAP_Setup.GetAllGroupMembers(host, groupName, username, password);
+
+            if (membersResponse.ResultArray != null && membersResponse.ResultArray.Length > 0)
+            {
+                foreach (var member in membersResponse.ResultArray)
+                {
+                    // member format: "Name (Type)"
+                    var split = member.LastIndexOf(" (");
+                    string memberName = split > 0 ? member.Substring(0, split) : member;
+                    string memberType = split > 0 ? member.Substring(split + 2, member.Length - split - 3) : "";
+
+                    if (memberType == "Group")
+                    {
+                        // Recursively add child group
+                        groupItem.Items.Add(BuildGroupTreeRecursive(memberName));
+                    }
+                    else
+                    {
+                        // Add user or unknown as leaf
+                        groupItem.Items.Add(new TreeViewItem { Header = member });
+                    }
+                }
+            }
+            return groupItem;
         }
 
         private void UserNameInputTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -306,19 +328,6 @@ namespace Setup_Application
             }
         }
 
-        private void GroupListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            if (GroupListBox.SelectedItem != null)
-            {
-                selectedName = GroupListBox.SelectedItem.ToString();
-                selectedType = "G";
-                OperatorRadio.Visibility = Visibility.Visible;
-                AdminRadio.Visibility = Visibility.Visible;
-                OperatorRadio.IsChecked = false; // Deselect radio buttons
-                AdminRadio.IsChecked = false;
-                SaveBtn.Visibility = Visibility.Collapsed; // Hide until permission selected
-            }
-        }
 
         private void PermissionRadio_Checked(object sender, RoutedEventArgs e)
         {
@@ -354,7 +363,7 @@ namespace Setup_Application
                 {
                     // Format: name,type,permission
                     var name = parts[0].Trim();
-                    var type = parts[1].Trim() == "U" ? "User" : "Group";
+                    var type = parts[1]. Trim() == "U" ? "User" : "Group";
                     var perm = parts[2].Trim() == "A" ? "Admin" : "Operator";
                     displayList.Add($"{name} ({type}) - {perm}");
                 }

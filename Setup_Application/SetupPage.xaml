@@ -34,11 +34,19 @@
         <TextBox x:Name="UserNameInputTextBox" Width="292" Height="33" Canvas.Left="337" Canvas.Top="225" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"  KeyDown="UserNameInputTextBox_KeyDown" FontSize="17"/>
         <TextBlock x:Name="GroupNamePromptTextBlock" Text="Enter group name:" Canvas.Left="173" Canvas.Top="225" Visibility="Collapsed" FontSize="18" Height="56" Width="329" HorizontalAlignment="Left" VerticalAlignment="Center" />
         <TextBox x:Name="GroupNameInputTextBox" Width="291" Height="33" Canvas.Left="338" Canvas.Top="225" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"  KeyDown="GroupNameInputTextBox_KeyDown" FontSize="17" TextChanged="GroupNameInputTextBox_TextChanged"/>
-        <ListBox x:Name="GroupListBox" Width="292" Height="183" Canvas.Left="337" Canvas.Top="225" Visibility="Collapsed" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         <ListBox x:Name="UserSelectListBox" Width="291" Height="183" Canvas.Left="338" Canvas.Top="263" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16"/>
         <Button Content="Show all users and groups with permission" Style="{StaticResource HighlightableButtonStyle}" Width="386" Canvas.Left="27" Canvas.Top="71" Click="ShowPermissionsBtn_Click" Height="40" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         <ListBox x:Name="PermissionsListBox" Width="600" Height="200" Canvas.Left="200" Canvas.Top="235" Visibility="Collapsed" FontSize="16"/>
         <Button x:Name="ClosePermissionsBtn" Content="X" Width="28" Height="28" Canvas.Left="760" Canvas.Top="235"
         Visibility="Collapsed" Click="ClosePermissionsBtn_Click" FontSize="16" Background="LightGray" Foreground="Red"/>
+        <TreeView x:Name="GroupTreeView"
+          Width="502"
+          Height="260"
+          Canvas.Left="196"
+          Canvas.Top="219"
+          Visibility="Collapsed"
+          FontSize="16"
+          HorizontalAlignment="Left"
+          VerticalAlignment="Top"/>
     </Canvas>
 </UserControl>
