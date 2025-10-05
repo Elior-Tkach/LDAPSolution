@@ -1,10 +1,12 @@
 ﻿using LDAP_DLL;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Collections.Generic;
 
 namespace Setup_Application
 {
-    public partial class SetupPage : Window
+    public partial class SetupPage : UserControl
     {
         private readonly string host;
         private readonly string username;
@@ -15,6 +17,8 @@ namespace Setup_Application
         // Add a mode flag to distinguish between group search and user-in-group search
         private enum GroupInputMode { None, FindGroup, UsersInGroup }
         private GroupInputMode groupInputMode = GroupInputMode.None;
+
+        private Button _lastHighlightedButton;
 
         public SetupPage(string host, string username, string password)
         {
@@ -45,8 +49,31 @@ namespace Setup_Application
             SaveBtn.Visibility = Visibility.Collapsed;
         }
 
+        private void HideAllTextAndListBoxes()
+        {
+            SelectedTextBox.Visibility = Visibility.Collapsed;
+            UserNameInputTextBox.Visibility = Visibility.Collapsed;
+            GroupNameInputTextBox.Visibility = Visibility.Collapsed;
+            GroupListBox.Visibility = Visibility.Collapsed;
+            UserSelectListBox.Visibility = Visibility.Collapsed;
+            PermissionsListBox.Visibility = Visibility.Collapsed;
+        }
+
+        private void HideAllTextAndListBoxesAndTextBlocks()
+        {
+            SelectedTextBox.Visibility = Visibility.Collapsed;
+            UserNameInputTextBox.Visibility = Visibility.Collapsed;
+            GroupNameInputTextBox.Visibility = Visibility.Collapsed;
+            GroupListBox.Visibility = Visibility.Collapsed;
+            UserSelectListBox.Visibility = Visibility.Collapsed;
+            PermissionsListBox.Visibility = Visibility.Collapsed;
+            UserNamePromptTextBlock.Visibility = Visibility.Collapsed;
+            GroupNamePromptTextBlock.Visibility = Visibility.Collapsed;
+        }
+
         private void FindUserBtn_Click(object sender, RoutedEventArgs e)
         {
+            Button_Click(sender, e); // Highlight logic
             HideAllDynamicControls();
             UserNamePromptTextBlock.Visibility = Visibility.Visible;
             UserNameInputTextBox.Visibility = Visibility.Visible;
@@ -57,6 +84,7 @@ namespace Setup_Application
 
         private void FindGroupBtn_Click(object sender, RoutedEventArgs e)
         {
+            Button_Click(sender, e); // Highlight logic
             HideAllDynamicControls();
             GroupNamePromptTextBlock.Visibility = Visibility.Visible;
             GroupNameInputTextBox.Visibility = Visibility.Visible;
@@ -69,6 +97,7 @@ namespace Setup_Application
 
         private void ChooseUserFromGroupBtn_Click(object sender, RoutedEventArgs e)
         {
+            Button_Click(sender, e); // Highlight logic
             HideAllDynamicControls();
             GroupNamePromptTextBlock.Visibility = Visibility.Visible;
             GroupNameInputTextBox.Visibility = Visibility.Visible;
@@ -82,6 +111,7 @@ namespace Setup_Application
 
         private void ChooseGroupFromListBtn_Click(object sender, RoutedEventArgs e)
         {
+            Button_Click(sender, e); // Highlight logic
             HideAllDynamicControls();
             SelectedTextBox.Visibility = Visibility.Collapsed;
             UserSelectListBox.Visibility = Visibility.Collapsed;
@@ -210,16 +240,22 @@ namespace Setup_Application
 
         private void ClearAllBtn_Click(object sender, RoutedEventArgs e)
         {
-            var response = LDAP_Setup.ClearLdapPermissions();
-            if (!string.IsNullOrEmpty(response.ErrorMessage))
+            Button_Click(sender, e); // Highlight logic
+            HideAllTextAndListBoxesAndTextBlocks(); // Hide all textboxes, listboxes, and textblocks
+            var result = MessageBox.Show("Are you sure you want to delete all users and groups?", "Confirm Clear", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.Yes)
             {
-                SelectedTextBox.Text = response.ErrorMessage;
-                SelectedTextBox.Visibility = Visibility.Visible;
-                return;
+                var response = LDAP_Setup.ClearLdapPermissions();
+                if (!string.IsNullOrEmpty(response.ErrorMessage))
+                {
+                    SelectedTextBox.Text = response.ErrorMessage;
+                    SelectedTextBox.Visibility = Visibility.Visible;
+                    return;
+                }
+                SelectedTextBox.Text = "";
+                HideAllDynamicControls();
+                HidePermissionControls();
             }
-            SelectedTextBox.Text = "";
-            HideAllDynamicControls();
-            HidePermissionControls();
         }
 
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
@@ -252,12 +288,6 @@ namespace Setup_Application
 
         }
 
-        private void ReturnToPreviousPageBtn_Click(object sender, RoutedEventArgs e)
-        {
-            var connectionWindow = new ConnectionWithServer();
-            connectionWindow.Show();
-            this.Close();
-        }
 
         private void UserSelectListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
@@ -294,5 +324,72 @@ namespace Setup_Application
         {
             SaveBtn.Visibility = Visibility.Visible;
         }
+
+        private void ShowPermissionsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Button_Click(sender, e); // Highlight logic
+            HideAllTextAndListBoxesAndTextBlocks(); // Hide all textboxes, listboxes, and textblocks
+            PermissionsListBox.ItemsSource = null;
+            PermissionsListBox.Visibility = Visibility.Collapsed;
+
+            // Read LDAP.ini and parse permissions
+            string iniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "LDAP.ini");
+            if (!System.IO.File.Exists(iniPath))
+            {
+                MessageBox.Show("LDAP.ini file not found.");
+                return;
+            }
+
+            var lines = System.IO.File.ReadAllLines(iniPath);
+            var displayList = new List<string>();
+            foreach (var line in lines)
+            {
+                // Skip comments and section headers
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#") || line.StartsWith("Server:") || line.StartsWith("-"))
+                    continue;
+
+                // Only show lines with permission info (e.g., name,type,permission)
+                var parts = line.Split(',');
+                if (parts.Length == 3)
+                {
+                    // Format: name,type,permission
+                    var name = parts[0].Trim();
+                    var type = parts[1].Trim() == "U" ? "User" : "Group";
+                    var perm = parts[2].Trim() == "A" ? "Admin" : "Operator";
+                    displayList.Add($"{name} ({type}) - {perm}");
+                }
+            }
+
+            if (displayList.Count > 0)
+            {
+                PermissionsListBox.ItemsSource = displayList;
+                PermissionsListBox.Visibility = Visibility.Visible;
+                ClosePermissionsBtn.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                MessageBox.Show("No permissions found in LDAP.ini.");
+            }
+        }
+
+        private void ClosePermissionsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            PermissionsListBox.Visibility = Visibility.Collapsed;
+            ClosePermissionsBtn.Visibility = Visibility.Collapsed;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (_lastHighlightedButton != null)
+                _lastHighlightedButton.Tag = null;
+
+            var clickedButton = sender as Button;
+            if (clickedButton != null)
+            {
+                clickedButton.Tag = "Highlighted";
+                _lastHighlightedButton = clickedButton;
+            }
+        }
     }
 }
+

@@ -1,0 +1,13 @@
+<Window x:Class="Setup_Application.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:Setup_Application"
+        Title="LDAP Application" Height="600" Width="1000">
+    <Grid>
+        <TabControl x:Name="MainTabControl">
+            <TabItem Header="Connection">
+                <local:ConnectionWithServer />
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
