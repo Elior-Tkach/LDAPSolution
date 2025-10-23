@@ -91,18 +91,6 @@ namespace Setup_Application
             groupInputMode = GroupInputMode.FindGroup;
         }
 
-        private void ChooseUserFromGroupBtn_Click(object sender, RoutedEventArgs e)
-        {
-            Button_Click(sender, e); // Highlight logic
-            HideAllDynamicControls();
-            GroupNamePromptTextBlock.Visibility = Visibility.Visible;
-            GroupNameInputTextBox.Visibility = Visibility.Visible;
-            SelectedTextBox.Visibility = Visibility.Collapsed;
-            UserSelectListBox.Visibility = Visibility.Collapsed;
-            GroupNameInputTextBox.Text = string.Empty;
-            HidePermissionControls();
-            groupInputMode = GroupInputMode.UsersInGroup;
-        }
 
         private void ChooseGroupFromListBtn_Click(object sender, RoutedEventArgs e)
         {

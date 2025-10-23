@@ -133,5 +133,8 @@
     <Resource Include="error.png" />
     <Resource Include="success.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Accellix logo3.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

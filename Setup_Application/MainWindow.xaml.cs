@@ -28,5 +28,10 @@ namespace Setup_Application
             }
             MainTabControl.SelectedIndex = 1; // Switch to Setup tab
         }
+
+        private void ConnectionWithServer_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

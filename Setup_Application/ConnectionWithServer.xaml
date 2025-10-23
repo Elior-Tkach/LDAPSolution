@@ -3,24 +3,24 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    mc:Ignorable="d" 
-    d:DesignHeight="600" d:DesignWidth="1000">
+     mc:Ignorable="d" 
+    d:DesignHeight="600" d:DesignWidth="900">
     <Canvas>
         <Canvas.Background>
             <ImageBrush ImageSource="Accellix logo2.png" Stretch="UniformToFill"/>
         </Canvas.Background>
-        <TextBlock Text="Enter IP address/ host name:" Canvas.Left="48" Canvas.Top="85" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-        <TextBox x:Name="HostTextBox" Width="250" FontSize="24" Canvas.Left="394" Canvas.Top="85" Height="46" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="InputFieldsChanged"/>
-        <Button x:Name="TestConnectionBtn" Content="Test connection" Width="172" FontSize="21" Canvas.Left="712" Canvas.Top="76" Click="TestConnectionBtn_Click" Height="32" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-        <Button x:Name="SaveServerBtn" Content="Save the server" Width="172" FontSize="21" Canvas.Left="712" Canvas.Top="116" Click="SaveServerBtn_Click" Height="31" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-        <Button x:Name="ContinueBtn" Content="Continue to setup" Width="228" FontSize="23" Canvas.Left="684" Canvas.Top="213" Click="ContinueBtn_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Height="40" IsEnabled="False"/>
-        <Border x:Name="ErrorTextBoxBorder" BorderBrush= "Black" BorderThickness="2" Visibility="Collapsed" Canvas.Left="224" Canvas.Top="272" Width="704" Height="48" HorizontalAlignment="Left" VerticalAlignment="Center"  >
-            <TextBox x:Name="ErrorTextBox" Width="722" FontSize="18" IsReadOnly="True" Height="54" BorderThickness="0" Background="Transparent" Visibility="Collapsed"/>
+        <TextBlock Text="IP address/ host name:" Canvas.Left="50" Canvas.Top="69" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <TextBox x:Name="HostTextBox" Width="250" FontSize="24" Canvas.Left="325" Canvas.Top="69" Height="46" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="InputFieldsChanged"/>
+        <Button x:Name="TestConnectionBtn" Content="Test connection" Width="172" FontSize="21" Canvas.Left="651" Canvas.Top="69" Click="TestConnectionBtn_Click" Height="32" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Button x:Name="SaveServerBtn" Content="Save the server" Width="172" FontSize="21" Canvas.Left="651" Canvas.Top="111" Click="SaveServerBtn_Click" Height="31" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Button x:Name="ContinueBtn" Content="Continue to setup" Width="228" FontSize="23" Canvas.Left="595" Canvas.Top="194" Click="ContinueBtn_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Height="40" IsEnabled="False"/>
+        <Border x:Name="ErrorTextBoxBorder" BorderBrush= "Black" Visibility="Collapsed" BorderThickness="2"  Canvas.Left="67" Canvas.Top="252" Width="792" Height="35" HorizontalAlignment="Left" VerticalAlignment="Center"  >
+            <TextBox x:Name="ErrorTextBox" FontSize="18" Visibility="Collapsed" IsReadOnly="True" Height="54" BorderThickness="0" Background="Transparent" Margin="2,0,-38,-23" />
         </Border>
-        <TextBlock Text="Enter password:" Canvas.Left="48" Canvas.Top="211" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-        <PasswordBox x:Name="PasswordTextBox" Width="250" FontSize="24" Canvas.Left="394" Canvas.Top="211" Height="44" HorizontalAlignment="Center" VerticalAlignment="Top" PasswordChanged="InputFieldsChanged"/>
-        <TextBlock Text="Enter username:" Canvas.Left="48" Canvas.Top="151" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-        <TextBox x:Name="UsernameTextBox" Width="250" FontSize="24" Canvas.Left="394" Canvas.Top="151" Height="46" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="InputFieldsChanged"/>
-        <Image x:Name="StatusIcon" Canvas.Left="179" Visibility="Collapsed" Canvas.Top="272" Width="32" Height="32" RenderTransformOrigin="1.479,0.452" HorizontalAlignment="Left" VerticalAlignment="Center" />
+        <TextBlock Text="password:" Canvas.Left="189" Canvas.Top="195" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <PasswordBox x:Name="PasswordTextBox" Width="250" FontSize="24" Canvas.Left="325" Canvas.Top="195" Height="44" HorizontalAlignment="Center" VerticalAlignment="Top" PasswordChanged="InputFieldsChanged"/>
+        <TextBlock Text="username:" Canvas.Left="189" Canvas.Top="134" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <TextBox x:Name="UsernameTextBox" Width="250" FontSize="24" Canvas.Left="325" Canvas.Top="135" Height="46" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="InputFieldsChanged"/>
+        <Image x:Name="StatusIcon" Canvas.Left="33" Visibility="Collapsed" Canvas.Top="251" Width="32" Height="32" RenderTransformOrigin="1.479,0.452" HorizontalAlignment="Left" VerticalAlignment="Center" />
     </Canvas>
 </UserControl>
