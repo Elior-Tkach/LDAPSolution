@@ -20,6 +20,14 @@ namespace Setup_Application
 
         private Button _lastHighlightedButton;
 
+        public class TreeNodeData
+        {
+            public string Name { get; set; }
+            public string TypeLabel { get; set; }
+            public List<TreeNodeData> Children { get; set; } = new List<TreeNodeData>();
+        }
+
+
         public SetupPage(string host, string username, string password)
         {
             InitializeComponent();
@@ -38,6 +46,7 @@ namespace Setup_Application
             UserNameInputTextBox.Visibility = Visibility.Collapsed;
             GroupNamePromptTextBlock.Visibility = Visibility.Collapsed;
             GroupNameInputTextBox.Visibility = Visibility.Collapsed;
+            GroupTreeView.Visibility = Visibility.Collapsed;
         }
 
         private void HidePermissionControls()
@@ -104,7 +113,6 @@ namespace Setup_Application
             GroupTreeView.Items.Clear();
             GroupTreeView.Visibility = Visibility.Collapsed;
 
-            // Get all groups from LDAP
             var groupsResponse = LDAP_Setup.GetAllGroups(host, username, password);
             if (!string.IsNullOrEmpty(groupsResponse.ErrorMessage))
             {
@@ -117,8 +125,7 @@ namespace Setup_Application
             {
                 foreach (var groupName in groupsResponse.ResultArray)
                 {
-                    var groupItem = BuildGroupTreeRecursive(groupName);
-                    GroupTreeView.Items.Add(groupItem);
+                    GroupTreeView.Items.Add(BuildGroupTreeRecursive(groupName));
                 }
                 GroupTreeView.Visibility = Visibility.Visible;
             }
@@ -130,30 +137,66 @@ namespace Setup_Application
             HidePermissionControls();
         }
 
-        // Recursive helper to build group-member hierarchy
-        private TreeViewItem BuildGroupTreeRecursive(string groupName)
+             // Recursive helper to build group-member hierarchy
+        private TreeNodeData BuildGroupTreeRecursiveData(string groupName)
         {
-            var groupItem = new TreeViewItem { Header = groupName };
+            var node = new TreeNodeData { Name = groupName, TypeLabel = "(Group)" };
             var membersResponse = LDAP_Setup.GetAllGroupMembers(host, groupName, username, password);
 
             if (membersResponse.ResultArray != null && membersResponse.ResultArray.Length > 0)
             {
                 foreach (var member in membersResponse.ResultArray)
                 {
-                    // member format: "Name (Type)"
                     var split = member.LastIndexOf(" (");
                     string memberName = split > 0 ? member.Substring(0, split) : member;
                     string memberType = split > 0 ? member.Substring(split + 2, member.Length - split - 3) : "";
 
                     if (memberType == "Group")
                     {
-                        // Recursively add child group
+                        // Recursively build child group and set label
+                        var childGroup = BuildGroupTreeRecursiveData(memberName);
+                        childGroup.TypeLabel = "(Group)";
+                        node.Children.Add(childGroup);
+                    }
+                    else
+                    {
+                        node.Children.Add(new TreeNodeData { Name = memberName, TypeLabel = $"({memberType})" });
+                    }
+                }
+            }
+            return node;
+        }
+
+        private TreeViewItem BuildGroupTreeRecursive(string groupName)
+        {
+            // Create a StackPanel for custom coloring
+            var stackPanel = new StackPanel { Orientation = Orientation.Horizontal };
+            stackPanel.Children.Add(new TextBlock { Text = groupName });
+            stackPanel.Children.Add(new TextBlock { Text = " " });
+            stackPanel.Children.Add(new TextBlock { Text = "(Group)", Foreground = System.Windows.Media.Brushes.Blue, FontWeight = FontWeights.Bold });
+
+            var groupItem = new TreeViewItem { Header = stackPanel };
+            var membersResponse = LDAP_Setup.GetAllGroupMembers(host, groupName, username, password);
+
+            if (membersResponse.ResultArray != null && membersResponse.ResultArray.Length >0)
+            {
+                foreach (var member in membersResponse.ResultArray)
+                {
+                    var split = member.LastIndexOf(" (");
+                    string memberName = split >0 ? member.Substring(0, split) : member;
+                    string memberType = split >0 ? member.Substring(split +2, member.Length - split -3) : "";
+
+                    if (memberType == "Group")
+                    {
                         groupItem.Items.Add(BuildGroupTreeRecursive(memberName));
                     }
                     else
                     {
-                        // Add user or unknown as leaf
-                        groupItem.Items.Add(new TreeViewItem { Header = member });
+                        var userPanel = new StackPanel { Orientation = Orientation.Horizontal };
+                        userPanel.Children.Add(new TextBlock { Text = memberName });
+                        userPanel.Children.Add(new TextBlock { Text = " " });
+                        userPanel.Children.Add(new TextBlock { Text = "(User)", Foreground = System.Windows.Media.Brushes.Green, FontWeight = FontWeights.Bold });
+                        groupItem.Items.Add(new TreeViewItem { Header = userPanel });
                     }
                 }
             }
@@ -363,7 +406,7 @@ namespace Setup_Application
                 {
                     // Format: name,type,permission
                     var name = parts[0].Trim();
-                    var type = parts[1]. Trim() == "U" ? "User" : "Group";
+                    var type = parts[1].Trim() == "U" ? "User" : "Group";
                     var perm = parts[2].Trim() == "A" ? "Admin" : "Operator";
                     displayList.Add($"{name} ({type}) - {perm}");
                 }
@@ -401,4 +444,4 @@ namespace Setup_Application
         }
     }
 }
-
+   

@@ -14,6 +14,21 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <!-- Remove duplicate DataTemplate with same key -->
+        <DataTemplate x:Key="TreeViewHeaderTemplate">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Name}" />
+                <TextBlock Text=" " />
+                <TextBlock Text="{Binding TypeLabel}" Foreground="Blue" FontWeight="Bold"/>
+            </StackPanel>
+        </DataTemplate>
+        <HierarchicalDataTemplate x:Key="TreeViewHeaderHierarchicalTemplate" ItemsSource="{Binding Children}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Name}" />
+                <TextBlock Text=" " />
+                <TextBlock Text="{Binding TypeLabel}" Foreground="Blue" FontWeight="Bold"/>
+            </StackPanel>
+        </HierarchicalDataTemplate>
     </UserControl.Resources>
     <Canvas>
         <Canvas.Background>
@@ -39,14 +54,16 @@
         <ListBox x:Name="PermissionsListBox" Width="600" Height="200" Canvas.Left="200" Canvas.Top="235" Visibility="Collapsed" FontSize="16"/>
         <Button x:Name="ClosePermissionsBtn" Content="X" Width="28" Height="28" Canvas.Left="760" Canvas.Top="235"
         Visibility="Collapsed" Click="ClosePermissionsBtn_Click" FontSize="16" Background="LightGray" Foreground="Red"/>
+
         <TreeView x:Name="GroupTreeView"
-          Width="502"
-          Height="260"
-          Canvas.Left="196"
-          Canvas.Top="219"
-          Visibility="Collapsed"
-          FontSize="16"
-          HorizontalAlignment="Left"
-          VerticalAlignment="Top"/>
+                  ItemTemplate="{StaticResource TreeViewHeaderTemplate}"
+                  Width="292"
+                  Height="183"
+                  Canvas.Left="337"
+                  Canvas.Top="225"
+                  Visibility="Collapsed"
+                  FontSize="16"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Top"/>
     </Canvas>
 </UserControl>
