@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authentication.Test", "Auth
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Setup_Application", "Setup_Application\Setup_Application.csproj", "{EC380190-430C-481C-B29C-3BE6BD180152}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_Authentication", "Test_Authentication\Test_Authentication.csproj", "{8C49F177-D238-412E-ADF5-2FDE3B897611}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,14 @@ Global
 		{EC380190-430C-481C-B29C-3BE6BD180152}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EC380190-430C-481C-B29C-3BE6BD180152}.Release|x64.ActiveCfg = Release|x64
 		{EC380190-430C-481C-B29C-3BE6BD180152}.Release|x64.Build.0 = Release|x64
+		{8C49F177-D238-412E-ADF5-2FDE3B897611}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C49F177-D238-412E-ADF5-2FDE3B897611}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C49F177-D238-412E-ADF5-2FDE3B897611}.Debug|x64.ActiveCfg = Debug|x64
+		{8C49F177-D238-412E-ADF5-2FDE3B897611}.Debug|x64.Build.0 = Debug|x64
+		{8C49F177-D238-412E-ADF5-2FDE3B897611}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C49F177-D238-412E-ADF5-2FDE3B897611}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C49F177-D238-412E-ADF5-2FDE3B897611}.Release|x64.ActiveCfg = Release|Any CPU
+		{8C49F177-D238-412E-ADF5-2FDE3B897611}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +76,7 @@ Global
 		{121C2A23-E942-418E-9992-E02D62E8938A} = {AE87FD36-24C8-48C9-98EA-CD1C041D58A4}
 		{6E68E5DB-30AE-47A2-9A44-57A653E25080} = {AE87FD36-24C8-48C9-98EA-CD1C041D58A4}
 		{EC380190-430C-481C-B29C-3BE6BD180152} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{8C49F177-D238-412E-ADF5-2FDE3B897611} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {274A5CC7-06E8-4B00-B5B7-EDD67B560EC8}
