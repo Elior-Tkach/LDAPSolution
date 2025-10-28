@@ -38,6 +38,7 @@ namespace Setup_Application
             UserSelectListBox.SelectionChanged += UserSelectListBox_SelectionChanged;
             OperatorRadio.Checked += PermissionRadio_Checked;
             AdminRadio.Checked += PermissionRadio_Checked;
+            GroupTreeView.SelectedItemChanged += GroupTreeView_SelectedItemChanged;
         }
 
         private void HideAllDynamicControls()
@@ -359,6 +360,36 @@ namespace Setup_Application
             }
         }
 
+        private void GroupTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            var selectedItem = GroupTreeView.SelectedItem;
+            if (selectedItem is TreeViewItem tvi && tvi.Header is StackPanel sp)
+            {
+                // Find the label text (last TextBlock in the StackPanel)
+                string typeLabel = null;
+                string name = null;
+                foreach (var child in sp.Children)
+                {
+                    if (child is TextBlock tb)
+                    {
+                        if (tb.Text.StartsWith("("))
+                            typeLabel = tb.Text;
+                        else if (!string.IsNullOrWhiteSpace(tb.Text) && tb.Text != " ")
+                            name = tb.Text;
+                    }
+                }
+                if (typeLabel == "(Group)" || typeLabel == "(User)")
+                {
+                    selectedName = name;
+                    selectedType = typeLabel == "(Group)" ? "G" : "U";
+                    OperatorRadio.Visibility = Visibility.Visible;
+                    AdminRadio.Visibility = Visibility.Visible;
+                    OperatorRadio.IsChecked = false;
+                    AdminRadio.IsChecked = false;
+                    SaveBtn.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
 
         private void PermissionRadio_Checked(object sender, RoutedEventArgs e)
         {
@@ -369,8 +400,14 @@ namespace Setup_Application
         {
             Button_Click(sender, e); // Highlight logic
             HideAllTextAndListBoxesAndTextBlocks(); // Hide all textboxes, listboxes, and textblocks
+            GroupTreeView.Visibility = Visibility.Collapsed; // Hide the tree view
             PermissionsListBox.ItemsSource = null;
             PermissionsListBox.Visibility = Visibility.Collapsed;
+
+            // Hide permission controls when showing permissions
+            OperatorRadio.Visibility = Visibility.Collapsed;
+            AdminRadio.Visibility = Visibility.Collapsed;
+            SaveBtn.Visibility = Visibility.Collapsed;
 
             // Read LDAP.ini and parse permissions
             string iniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "LDAP.ini");

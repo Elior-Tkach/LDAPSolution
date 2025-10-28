@@ -37,31 +37,40 @@
         <Button Content="Find User" Style="{StaticResource HighlightableButtonStyle}" Width="166" Canvas.Left="34" Canvas.Top="105" Click="FindUserBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="46" FontSize="20" Tag="Highlightable"/>
         <Button Content="Find Group" Style="{StaticResource HighlightableButtonStyle}" Width="160" Canvas.Left="214" Canvas.Top="104" Click="FindGroupBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="47" FontSize="20" Tag="Highlightable"/>
         <Button Content="Choose group or user from the tree" Style="{StaticResource HighlightableButtonStyle}" Width="340" Canvas.Left="34" Canvas.Top="163" Click="ChooseGroupFromListBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="47" FontSize="20" Tag="Highlightable"/>
-        <Button Content="Clear all users and groups" Style="{StaticResource HighlightableButtonStyle}" Width="241" Canvas.Left="598" Canvas.Top="100" Click="ClearAllBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Center" Height="40" FontSize="18" Tag="Highlightable"/>
-        <RadioButton x:Name="OperatorRadio" Content="Operator" GroupName="Role" Visibility="Collapsed" Canvas.Left="685" Canvas.Top="225" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="18" />
-        <RadioButton x:Name="AdminRadio" Content="Administrator" GroupName="Role" Visibility="Collapsed" Canvas.Left="791" Canvas.Top="225" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="18" />
+        <Button Content="Clear all users and groups" Style="{StaticResource HighlightableButtonStyle}" Width="241" Canvas.Left="598" Canvas.Top="100" Click="ClearAllBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Center" Height="40" FontSize="18" Tag="Highlightable" Background="Red"/>
+        <RadioButton x:Name="OperatorRadio" Content="Operator" GroupName="Role" Visibility="Collapsed" Canvas.Left="597" Canvas.Top="215" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18" />
+        <RadioButton x:Name="AdminRadio" Content="Administrator" GroupName="Role" Visibility="Collapsed" Canvas.Left="703" Canvas.Top="215" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18" />
         <TextBox x:Name="SelectedTextBox" Width="292" IsReadOnly="True" Canvas.Left="337" Canvas.Top="264" Visibility="Collapsed" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center" Height="28" BorderThickness="0" Background="Transparent" />
-        <Button Content="Save" x:Name="SaveBtn" Width="121" Canvas.Left="734" Visibility="Collapsed" Canvas.Top="284" Click="SaveBtn_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Height="32" FontSize="20" />
+        <Button Content="Save" x:Name="SaveBtn" Width="121" Canvas.Left="650" Visibility="Collapsed" Canvas.Top="257" Click="SaveBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="32" FontSize="20" RenderTransformOrigin="0.5,0.5" >
+            <Button.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="0.4"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Button.RenderTransform>
+        </Button>
         <!-- Dynamic Controls -->
         <TextBlock x:Name="UserNamePromptTextBlock" Text="Enter user name:" Canvas.Left="188" Canvas.Top="224" Visibility="Collapsed" FontSize="18" Height="56" Width="329"/>
         <TextBox x:Name="UserNameInputTextBox" Width="292" Height="33" Canvas.Left="337" Canvas.Top="225" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"  KeyDown="UserNameInputTextBox_KeyDown" FontSize="17"/>
         <TextBlock x:Name="GroupNamePromptTextBlock" Text="Enter group name:" Canvas.Left="173" Canvas.Top="225" Visibility="Collapsed" FontSize="18" Height="56" Width="329" HorizontalAlignment="Left" VerticalAlignment="Center" />
         <TextBox x:Name="GroupNameInputTextBox" Width="291" Height="33" Canvas.Left="338" Canvas.Top="225" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"  KeyDown="GroupNameInputTextBox_KeyDown" FontSize="17" TextChanged="GroupNameInputTextBox_TextChanged"/>
         <ListBox x:Name="UserSelectListBox" Width="291" Height="183" Canvas.Left="338" Canvas.Top="263" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16"/>
-        <Button Content="Show all users and groups with permission" Style="{StaticResource HighlightableButtonStyle}" Width="386" Canvas.Left="453" Canvas.Top="159" Click="ShowPermissionsBtn_Click" Height="40" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Button Content="Show all users and groups with permission" Style="{StaticResource HighlightableButtonStyle}" Width="386" Canvas.Left="453" Canvas.Top="159" Click="ShowPermissionsBtn_Click" Height="40" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Center" Background="LightGreen"/>
         <ListBox x:Name="PermissionsListBox" Width="600" Height="200" Canvas.Left="200" Canvas.Top="235" Visibility="Collapsed" FontSize="16"/>
         <Button x:Name="ClosePermissionsBtn" Content="X" Width="28" Height="28" Canvas.Left="760" Canvas.Top="235"
         Visibility="Collapsed" Click="ClosePermissionsBtn_Click" FontSize="16" Background="LightGray" Foreground="Red"/>
 
         <TreeView x:Name="GroupTreeView"
                   ItemTemplate="{StaticResource TreeViewHeaderTemplate}"
-                  Width="292"
-                  Height="183"
-                  Canvas.Left="337"
-                  Canvas.Top="225"
+                  Width="490"
+                  Height="220"
+                  Canvas.Left="77"
+                  Canvas.Top="236"
                   Visibility="Collapsed"
                   FontSize="16"
-                  HorizontalAlignment="Center"
+                  HorizontalAlignment="Left"
                   VerticalAlignment="Top"/>
     </Canvas>
 </UserControl>
