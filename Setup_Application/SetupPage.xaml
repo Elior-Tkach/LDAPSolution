@@ -52,11 +52,11 @@
             </Button.RenderTransform>
         </Button>
         <!-- Dynamic Controls -->
-        <TextBlock x:Name="UserNamePromptTextBlock" Text="Enter user name:" Canvas.Left="188" Canvas.Top="224" Visibility="Collapsed" FontSize="18" Height="56" Width="329"/>
-        <TextBox x:Name="UserNameInputTextBox" Width="292" Height="33" Canvas.Left="337" Canvas.Top="225" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"  KeyDown="UserNameInputTextBox_KeyDown" FontSize="17"/>
-        <TextBlock x:Name="GroupNamePromptTextBlock" Text="Enter group name:" Canvas.Left="173" Canvas.Top="225" Visibility="Collapsed" FontSize="18" Height="56" Width="329" HorizontalAlignment="Left" VerticalAlignment="Center" />
-        <TextBox x:Name="GroupNameInputTextBox" Width="291" Height="33" Canvas.Left="338" Canvas.Top="225" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"  KeyDown="GroupNameInputTextBox_KeyDown" FontSize="17" TextChanged="GroupNameInputTextBox_TextChanged"/>
-        <ListBox x:Name="UserSelectListBox" Width="291" Height="183" Canvas.Left="338" Canvas.Top="263" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16"/>
+        <TextBlock x:Name="UserNamePromptTextBlock" Text="Enter user name:" Canvas.Left="115" Canvas.Top="236" Visibility="Collapsed" FontSize="18" Height="56" Width="329"/>
+        <TextBox x:Name="UserNameInputTextBox" Width="292" Height="34" Canvas.Left="264" Canvas.Top="236" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"  KeyDown="UserNameInputTextBox_KeyDown" FontSize="17"/>
+        <TextBlock x:Name="GroupNamePromptTextBlock" Text="Enter group name:" Canvas.Left="100" Canvas.Top="236" Visibility="Collapsed" FontSize="18" Height="56" Width="329" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <TextBox x:Name="GroupNameInputTextBox" Width="291" Height="34" Canvas.Left="265" Canvas.Top="236" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"  KeyDown="GroupNameInputTextBox_KeyDown" FontSize="17" TextChanged="GroupNameInputTextBox_TextChanged"/>
+        <ListBox x:Name="UserSelectListBox" Width="291" Height="183" Canvas.Left="265" Canvas.Top="275" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16"/>
         <Button Content="Show all users and groups with permission" Style="{StaticResource HighlightableButtonStyle}" Width="386" Canvas.Left="453" Canvas.Top="159" Click="ShowPermissionsBtn_Click" Height="40" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Center" Background="LightGreen"/>
         <ListBox x:Name="PermissionsListBox" Width="600" Height="200" Canvas.Left="200" Canvas.Top="235" Visibility="Collapsed" FontSize="16"/>
         <Button x:Name="ClosePermissionsBtn" Content="X" Width="28" Height="28" Canvas.Left="760" Canvas.Top="235"

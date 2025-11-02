@@ -29,11 +29,5 @@ namespace LDAP_DLL
         /// </summary>
         public string[] ResultArray { get; set; } = Array.Empty<string>();
 
-        /// <summary>
-        /// Optional boolean result (for functions returning true/false)
-        /// </summary>
-        public bool ResultBool { get; set; } = false;
-
-
     }
 }

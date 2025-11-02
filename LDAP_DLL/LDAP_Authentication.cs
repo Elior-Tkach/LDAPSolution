@@ -136,7 +136,7 @@ namespace LDAP_DLL
                     if (IsUserRegistered(username, permissionType))
                     {
                         logger.Info($"User '{username}' authenticated and registered with permission '{permissionType}'.");
-                        response.ResultBool = true;
+                        response.Success = true;
                         return response;
                     }
                 }
@@ -150,7 +150,7 @@ namespace LDAP_DLL
                         if (IsUserInRegisteredGroup(username, username, password, permissionType))
                         {
                             logger.Info($"User '{username}' authenticated via group with permission '{permissionType}'.");
-                            response.ResultBool = true;
+                            response.Success = true;
                             return response;
                         }
                     }
@@ -160,7 +160,6 @@ namespace LDAP_DLL
                         response.Success = false;
                         response.ErrorMessage = gex.Message;
                         response.ErrorNumber = gex.ErrorNumber;
-                        response.ResultBool = false;
                         return response;
                     }
                     catch (LdapAuthenticationException gex)
@@ -168,7 +167,6 @@ namespace LDAP_DLL
                         response.Success = false;
                         response.ErrorMessage = gex.Message;
                         response.ErrorNumber = gex.ErrorNumber;
-                        response.ResultBool = false;
                         return response;
                     }
                     catch (Exception ex2)
@@ -176,8 +174,7 @@ namespace LDAP_DLL
                         logger.Error(ex2, $"Unexpected error while checking group registration for user '{username}': {ex2.Message}");
                         response.Success = false;
                         response.ErrorMessage = ex2.Message;
-                        response.ErrorNumber = 4999;
-                        response.ResultBool = false;
+                        response.ErrorNumber = 4020;
                         return response;
                     }
                 }
@@ -188,7 +185,6 @@ namespace LDAP_DLL
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
-                response.ResultBool = false;
                 return response;
             }
             catch (LdapAuthenticationException ex)
@@ -197,7 +193,6 @@ namespace LDAP_DLL
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
-                response.ResultBool = false;
                 return response;
             }
             catch (Exception ex)
@@ -206,7 +201,6 @@ namespace LDAP_DLL
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = 4020;
-                response.ResultBool = false;
                 return response;
             }
             return response;

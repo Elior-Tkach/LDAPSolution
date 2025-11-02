@@ -269,9 +269,9 @@ namespace Setup_Application
                             UserSelectListBox.Visibility = Visibility.Collapsed;
                             return;
                         }
-                        if (!string.IsNullOrEmpty(response.ResultString))
+                        if (response.ResultArray != null && response.ResultArray.Length > 0)
                         {
-                            UserSelectListBox.ItemsSource = new[] { response.ResultString };
+                            UserSelectListBox.ItemsSource = response.ResultArray;
                             UserSelectListBox.Visibility = Visibility.Visible;
                             SelectedTextBox.Visibility = Visibility.Collapsed;
                         }

@@ -269,7 +269,7 @@ namespace LDAP_DLL
             var response = new LdapResponse();
             try
             {
-                response.ResultString = LDAP_Functions.GetGroupByNameSimple(ldapPath, groupName, username, password);
+                response.ResultArray = LDAP_Functions.GetGroupByNameSimple(ldapPath, groupName, username, password);
             }
             catch (LdapFunctionsException ex)
             {
@@ -318,14 +318,13 @@ namespace LDAP_DLL
             try
             {
                 LDAP_Functions.PingServerSimple(host);
-                response.ResultBool = true;
+                response.Success = true;
             }
             catch (LdapPingFailedException ex)
             {
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
-                response.ResultBool = false;
             }
             return response;
         }

@@ -264,9 +264,10 @@ namespace LDAP_DLL
             }
         }
 
-        public static string GetGroupByNameSimple(string ldapPath, string groupName, string username, string password)
+        public static string[] GetGroupByNameSimple(string ldapPath, string groupName, string username, string password)
         {
             logger.Info($"GetGroupByNameSimple called with ldapPath: {ldapPath}, groupName: {groupName}, username: {username}");
+            var groupNames = new List<string>();
             try
             {
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
@@ -274,18 +275,36 @@ namespace LDAP_DLL
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
-                    searcher.Filter = $"(&(objectClass=group)(sAMAccountName={groupName}))";
+                    searcher.Filter = $"(&(objectClass=group)(|(sAMAccountName=*{groupName}*)(cn=*{groupName}*)(name=*{groupName}*)))";
                     searcher.PropertiesToLoad.Add("sAMAccountName");
-                    var result = searcher.FindOne();
-                    if (result == null)
+                    searcher.PropertiesToLoad.Add("cn");
+                    searcher.PropertiesToLoad.Add("name");
+                    var results = searcher.FindAll();
+                    if (results == null || results.Count ==0)
                     {
                         throw new LdapDirectoryGroupNotFoundException(groupName);
                     }
-                    var groupEntry = result.GetDirectoryEntry();
-                    var sb = new StringBuilder();
-                    sb.Append(GetProperty(groupEntry, "sAMAccountName"));
-                    logger.Info($"Group found: {sb.ToString()}");
-                    return sb.ToString();
+                    foreach (SearchResult result in results)
+                    {
+                        var groupEntry = result.GetDirectoryEntry();
+                        var sAMAccountName = GetProperty(groupEntry, "sAMAccountName");
+                        var cn = GetProperty(groupEntry, "cn");
+                        var nameProp = GetProperty(groupEntry, "name");
+                        if (!string.IsNullOrEmpty(sAMAccountName))
+                        {
+                            groupNames.Add(sAMAccountName);
+                        }
+                        else if (!string.IsNullOrEmpty(cn))
+                        {
+                            groupNames.Add(cn);
+                        }
+                        else if (!string.IsNullOrEmpty(nameProp))
+                        {
+                            groupNames.Add(nameProp);
+                        }
+                    }
+                    logger.Info($"Groups found: {string.Join(", ", groupNames)}");
+                    return groupNames.ToArray();
                 }
             }
             catch (LdapDirectoryGroupNotFoundException)
@@ -297,22 +316,6 @@ namespace LDAP_DLL
                 logger.Error(ex, $"GetGroupByNameSimple failed: {ex.Message}");
                 throw new LdapDirectoryQueryException(ex.Message);
             }
-        }
-
-        // -------------------------
-        // Helpers
-        // -------------------------
-        private static string GetProperty(System.DirectoryServices.DirectoryEntry entry, string propertyName)
-        {
-            if (entry.Properties.Contains(propertyName) && entry.Properties[propertyName].Count > 0)
-                return entry.Properties[propertyName][0]?.ToString() ?? string.Empty;
-            return string.Empty;
-        }
-
-        public class LdapGroupMember
-        {
-            public string Name { get; set; }
-            public string Type { get; set; } // "User" or "Group"
         }
 
         public static List<LdapGroupMember> GetAllGroupMembers(string ldapPath, string groupName, string username, string password)
@@ -368,5 +371,23 @@ namespace LDAP_DLL
                 throw new LdapDirectoryQueryException(ex.Message);
             }
         }
+
+        // -------------------------
+        // Helpers
+        // -------------------------
+        private static string GetProperty(System.DirectoryServices.DirectoryEntry entry, string propertyName)
+        {
+            if (entry.Properties.Contains(propertyName) && entry.Properties[propertyName].Count > 0)
+                return entry.Properties[propertyName][0]?.ToString() ?? string.Empty;
+            return string.Empty;
+        }
+
+        public class LdapGroupMember
+        {
+            public string Name { get; set; }
+            public string Type { get; set; } // "User" or "Group"
+        }
+
+
     }
 }
