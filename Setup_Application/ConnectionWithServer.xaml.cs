@@ -76,10 +76,12 @@ namespace Setup_Application
 
         private void InputFieldsChanged(object sender, RoutedEventArgs e)
         {
-            ContinueBtn.IsEnabled =
+            bool allFilled = 
                 !string.IsNullOrWhiteSpace(HostTextBox.Text) &&
                 !string.IsNullOrWhiteSpace(UsernameTextBox.Text) &&
                 !string.IsNullOrWhiteSpace(PasswordTextBox.Password);
+
+            ContinueBtn.IsEnabled = allFilled;
         }
 
         private void ShowStatusIcon(bool success)

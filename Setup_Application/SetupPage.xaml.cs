@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Collections.Generic;
+using System.Linq; // Add this at the top with other using directives
 
 namespace Setup_Application
 {
@@ -332,9 +333,14 @@ namespace Setup_Application
             }
 
             if (response.Success)
-                MessageBox.Show("Permission saved successfully.");
+            {
+                SuccessMessageRun.Text = (selectedType == "G" ? "Group" : "User") + " saved successfully";
+                SuccessMessageTextBlock.Visibility = Visibility.Visible;
+            }
             else
+            {
                 MessageBox.Show("Error: " + response.ErrorMessage);
+            }
         }
 
         private void GroupNameInputTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -442,6 +448,8 @@ namespace Setup_Application
                 PermissionsListBox.ItemsSource = displayList;
                 PermissionsListBox.Visibility = Visibility.Visible;
                 ClosePermissionsBtn.Visibility = Visibility.Visible;
+                DeleteSelectedPermissionBtn.Visibility = Visibility.Visible; // Show delete button
+                ClearAllPermissionsBtn.Visibility = Visibility.Visible; // Show clear all button
             }
             else
             {
@@ -453,10 +461,71 @@ namespace Setup_Application
         {
             PermissionsListBox.Visibility = Visibility.Collapsed;
             ClosePermissionsBtn.Visibility = Visibility.Collapsed;
+            DeleteSelectedPermissionBtn.Visibility = Visibility.Collapsed;
+            ClearAllPermissionsBtn.Visibility = Visibility.Collapsed;
+        }
+
+        private void DeleteSelectedPermissionBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (PermissionsListBox.SelectedItem == null)
+            {
+                MessageBox.Show("Select a user or group to delete.");
+                return;
+            }
+
+            string selected = PermissionsListBox.SelectedItem.ToString();
+            // Extract the name and type from the display string
+            var match = System.Text.RegularExpressions.Regex.Match(selected, @"^(.*) \((User|Group)\) - (Admin|Operator)$");
+            if (!match.Success)
+            {
+                MessageBox.Show("Could not parse selected item.");
+                return;
+            }
+            string name = match.Groups[1].Value.Trim();
+            string type = match.Groups[2].Value == "User" ? "U" : "G";
+
+            string iniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "LDAP.ini");
+            if (!System.IO.File.Exists(iniPath))
+            {
+                MessageBox.Show("LDAP.ini file not found.");
+                return;
+            }
+            var lines = System.IO.File.ReadAllLines(iniPath).ToList();
+            var newLines = lines.Where(line =>
+                !(line.Split(',').Length == 3 &&
+                  line.Split(',')[0].Trim() == name &&
+                  line.Split(',')[1].Trim() == type)
+            ).ToList();
+            System.IO.File.WriteAllLines(iniPath, newLines);
+            ShowPermissionsBtn_Click(null, null); // Refresh list
+        }
+
+        private void ClearAllPermissionsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show("Are you sure you want to delete all users and groups?", "Confirm Clear", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.Yes)
+            {
+                string iniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "LDAP.ini");
+                if (!System.IO.File.Exists(iniPath))
+                {
+                    MessageBox.Show("LDAP.ini file not found.");
+                    return;
+                }
+                var lines = System.IO.File.ReadAllLines(iniPath);
+                var newLines = lines.Where(line =>
+                    string.IsNullOrWhiteSpace(line) ||
+                    line.StartsWith("#") ||
+                    line.StartsWith("Server:") ||
+                    line.StartsWith("-")
+                ).ToList();
+                System.IO.File.WriteAllLines(iniPath, newLines);
+                ShowPermissionsBtn_Click(null, null); // Refresh list
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            SuccessMessageTextBlock.Visibility = Visibility.Collapsed; // Hide success message on any button click
             if (_lastHighlightedButton != null)
                 _lastHighlightedButton.Tag = null;
 

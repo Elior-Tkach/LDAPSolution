@@ -5,6 +5,41 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
      mc:Ignorable="d" 
     d:DesignHeight="600" d:DesignWidth="900">
+    <UserControl.Resources>
+    <Style x:Key="HighlightableButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="LightGray"/>
+        <Style.Triggers>
+            <Trigger Property="Tag" Value="Highlighted">
+                <Setter Property="Background" Value="LightBlue"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <!-- Faded style for disabled buttons -->
+    <Style x:Key="FadedButtonStyle" TargetType="Button" BasedOn="{StaticResource HighlightableButtonStyle}">
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5"/>
+                <Setter Property="Foreground" Value="Gray"/>
+                <Setter Property="Background" Value="LightGray"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <!-- Remove duplicate DataTemplate with same key -->
+    <DataTemplate x:Key="TreeViewHeaderTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Name}" />
+            <TextBlock Text=" " />
+            <TextBlock Text="{Binding TypeLabel}" Foreground="Blue" FontWeight="Bold"/>
+        </StackPanel>
+    </DataTemplate>
+    <HierarchicalDataTemplate x:Key="TreeViewHeaderHierarchicalTemplate" ItemsSource="{Binding Children}">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Name}" />
+            <TextBlock Text=" " />
+            <TextBlock Text="{Binding TypeLabel}" Foreground="Blue" FontWeight="Bold"/>
+        </StackPanel>
+    </HierarchicalDataTemplate>
+</UserControl.Resources>
     <Canvas>
         <Canvas.Background>
             <ImageBrush ImageSource="Accellix logo2.png" Stretch="UniformToFill"/>
@@ -13,14 +48,14 @@
         <TextBox x:Name="HostTextBox" Width="250" FontSize="24" Canvas.Left="325" Canvas.Top="69" Height="46" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="InputFieldsChanged"/>
         <Button x:Name="TestConnectionBtn" Content="Test connection" Width="172" FontSize="21" Canvas.Left="651" Canvas.Top="69" Click="TestConnectionBtn_Click" Height="32" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         <Button x:Name="SaveServerBtn" Content="Save the server" Width="172" FontSize="21" Canvas.Left="651" Canvas.Top="111" Click="SaveServerBtn_Click" Height="31" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-        <Button x:Name="ContinueBtn" Content="Continue to setup" Width="228" FontSize="23" Canvas.Left="595" Canvas.Top="194" Click="ContinueBtn_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Height="40" IsEnabled="False"/>
-        <Border x:Name="ErrorTextBoxBorder" BorderBrush= "Black" Visibility="Collapsed" BorderThickness="2"  Canvas.Left="67" Canvas.Top="252" Width="792" Height="35" HorizontalAlignment="Left" VerticalAlignment="Center"  >
-            <TextBox x:Name="ErrorTextBox" FontSize="18" Visibility="Collapsed" IsReadOnly="True" Height="54" BorderThickness="0" Background="Transparent" Margin="2,0,-38,-23" />
+        <Button x:Name="ContinueBtn" Content="Continue to setup" Width="228" FontSize="23" Canvas.Left="595" Canvas.Top="194" Click="ContinueBtn_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Height="40" IsEnabled="False" Style="{StaticResource FadedButtonStyle}"/>
+        <Border x:Name="ErrorTextBoxBorder" BorderBrush= "Black" Visibility="Collapsed" BorderThickness="2"  Canvas.Left="33" Canvas.Top="252" Width="838" Height="35" HorizontalAlignment="Left" VerticalAlignment="Center"  >
+            <TextBox x:Name="ErrorTextBox" FontSize="18" Visibility="Collapsed" IsReadOnly="True" BorderThickness="0" Background="Transparent" Margin="8,0,8,-2" />
         </Border>
         <TextBlock Text="password:" Canvas.Left="189" Canvas.Top="195" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         <PasswordBox x:Name="PasswordTextBox" Width="250" FontSize="24" Canvas.Left="325" Canvas.Top="195" Height="44" HorizontalAlignment="Center" VerticalAlignment="Top" PasswordChanged="InputFieldsChanged"/>
         <TextBlock Text="username:" Canvas.Left="189" Canvas.Top="134" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         <TextBox x:Name="UsernameTextBox" Width="250" FontSize="24" Canvas.Left="325" Canvas.Top="135" Height="46" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="InputFieldsChanged"/>
-        <Image x:Name="StatusIcon" Canvas.Left="33" Visibility="Collapsed" Canvas.Top="251" Width="32" Height="32" RenderTransformOrigin="1.479,0.452" HorizontalAlignment="Left" VerticalAlignment="Center" />
+        <Image x:Name="StatusIcon" Visibility="Collapsed" Canvas.Top="252" Width="32" Height="32" RenderTransformOrigin="1.479,0.452" HorizontalAlignment="Left" VerticalAlignment="Top" />
     </Canvas>
 </UserControl>
