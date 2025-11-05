@@ -35,7 +35,6 @@ namespace Test_Authentication
             ResultBlock.Text = $"Success: {response.Success}\n" +
                                $"ErrorNumber: {response.ErrorNumber}\n" +
                                $"ErrorMessage: {response.ErrorMessage}\n" +
-                               $"ResultBool: {response.ResultBool}\n" +
                                $"ResultString: {response.ResultString}\n" +
                                $"ResultArray: {(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "null")}";
         }

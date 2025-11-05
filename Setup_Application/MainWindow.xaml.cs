@@ -5,7 +5,7 @@ namespace Setup_Application
 {
     public partial class MainWindow : Window
     {
-        public MainWindow()
+    public MainWindow()
         {
             InitializeComponent();
             var connectionControl = (ConnectionWithServer)((TabItem)MainTabControl.Items[0]).Content;

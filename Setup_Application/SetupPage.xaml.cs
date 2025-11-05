@@ -526,6 +526,13 @@ namespace Setup_Application
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             SuccessMessageTextBlock.Visibility = Visibility.Collapsed; // Hide success message on any button click
+
+            // Hide permissions controls on any button click
+            PermissionsListBox.Visibility = Visibility.Collapsed;
+            DeleteSelectedPermissionBtn.Visibility = Visibility.Collapsed;
+            ClearAllPermissionsBtn.Visibility = Visibility.Collapsed;
+            ClosePermissionsBtn.Visibility = Visibility.Collapsed;
+
             if (_lastHighlightedButton != null)
                 _lastHighlightedButton.Tag = null;
 

@@ -8,6 +8,18 @@
     <UserControl.Resources>
     <Style x:Key="HighlightableButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="LightGray"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="12">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
         <Style.Triggers>
             <Trigger Property="Tag" Value="Highlighted">
                 <Setter Property="Background" Value="LightBlue"/>
@@ -46,9 +58,15 @@
         </Canvas.Background>
         <TextBlock Text="IP address/ host name:" Canvas.Left="50" Canvas.Top="69" Height="56" Width="329" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         <TextBox x:Name="HostTextBox" Width="250" FontSize="24" Canvas.Left="325" Canvas.Top="69" Height="46" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="InputFieldsChanged"/>
-        <Button x:Name="TestConnectionBtn" Content="Test connection" Width="172" FontSize="21" Canvas.Left="651" Canvas.Top="69" Click="TestConnectionBtn_Click" Height="32" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-        <Button x:Name="SaveServerBtn" Content="Save the server" Width="172" FontSize="21" Canvas.Left="651" Canvas.Top="111" Click="SaveServerBtn_Click" Height="31" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-        <Button x:Name="ContinueBtn" Content="Continue to setup" Width="228" FontSize="23" Canvas.Left="595" Canvas.Top="194" Click="ContinueBtn_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Height="40" IsEnabled="False" Style="{StaticResource FadedButtonStyle}"/>
+        <Button x:Name="TestConnectionBtn" Content="Test connection" Width="172" FontSize="21" Canvas.Left="651" Canvas.Top="69"
+                Click="TestConnectionBtn_Click" Height="32" HorizontalAlignment="Center" VerticalAlignment="Top"
+                Style="{StaticResource HighlightableButtonStyle}"/>
+        <Button x:Name="SaveServerBtn" Content="Save the server" Width="172" FontSize="21" Canvas.Left="651" Canvas.Top="111"
+                Click="SaveServerBtn_Click" Height="31" HorizontalAlignment="Center" VerticalAlignment="Top"
+                Style="{StaticResource HighlightableButtonStyle}"/>
+        <Button x:Name="ContinueBtn" Content="Continue to setup" Width="228" FontSize="23" Canvas.Left="595" Canvas.Top="194"
+                Click="ContinueBtn_Click" HorizontalAlignment="Center" VerticalAlignment="Top" Height="40"
+                IsEnabled="False" Style="{StaticResource FadedButtonStyle}"/>
         <Border x:Name="ErrorTextBoxBorder" BorderBrush= "Black" Visibility="Collapsed" BorderThickness="2"  Canvas.Left="33" Canvas.Top="252" Width="838" Height="35" HorizontalAlignment="Left" VerticalAlignment="Center"  >
             <TextBox x:Name="ErrorTextBox" FontSize="18" Visibility="Collapsed" IsReadOnly="True" BorderThickness="0" Background="Transparent" Margin="8,0,8,-2" />
         </Border>

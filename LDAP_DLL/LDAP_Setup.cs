@@ -36,8 +36,13 @@ namespace LDAP_DLL
                 {
                     var hostEntry = System.Net.Dns.GetHostEntry(host);
                     hostName = hostEntry.HostName;
-                    ips = hostEntry.AddressList.Length > 0
-                        ? string.Join(", ", hostEntry.AddressList.Select(a => a.ToString()))
+                    // Only include IPv4 addresses
+                    var ipv4Addresses = hostEntry.AddressList
+                        .Where(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        .Select(a => a.ToString())
+                        .ToArray();
+                    ips = ipv4Addresses.Length > 0
+                        ? string.Join(", ", ipv4Addresses)
                         : "N/A";
                 }
                 catch (Exception ex)

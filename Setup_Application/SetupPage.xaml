@@ -7,6 +7,18 @@
     <UserControl.Resources>
         <Style x:Key="HighlightableButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"> <!-- Adjust the radius as you like -->
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
             <Style.Triggers>
                 <Trigger Property="Tag" Value="Highlighted">
                     <Setter Property="Background" Value="LightBlue"/>
