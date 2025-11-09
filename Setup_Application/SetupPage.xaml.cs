@@ -3,7 +3,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Collections.Generic;
-using System.Linq; // Add this at the top with other using directives
+using System.Linq;
+using System.Windows.Threading; // Add Dispatcher namespace
+using System; 
 
 namespace Setup_Application
 {
@@ -20,6 +22,8 @@ namespace Setup_Application
         private GroupInputMode groupInputMode = GroupInputMode.None;
 
         private Button _lastHighlightedButton;
+
+        private DispatcherTimer successMessageTimer; // Dispatcher timer for hiding success message
 
         public class TreeNodeData
         {
@@ -40,6 +44,17 @@ namespace Setup_Application
             OperatorRadio.Checked += PermissionRadio_Checked;
             AdminRadio.Checked += PermissionRadio_Checked;
             GroupTreeView.SelectedItemChanged += GroupTreeView_SelectedItemChanged;
+            UserGroupsListBox.SelectionChanged += UserGroupsListBox_SelectionChanged;
+
+            successMessageTimer = new DispatcherTimer();
+            successMessageTimer.Interval = TimeSpan.FromSeconds(3);
+            successMessageTimer.Tick += SuccessMessageTimer_Tick;
+        }
+
+        private void SuccessMessageTimer_Tick(object sender, EventArgs e)
+        {
+            SuccessMessageTextBlock.Visibility = Visibility.Collapsed;
+            successMessageTimer.Stop();
         }
 
         private void HideAllDynamicControls()
@@ -336,6 +351,8 @@ namespace Setup_Application
             {
                 SuccessMessageRun.Text = (selectedType == "G" ? "Group" : "User") + " saved successfully";
                 SuccessMessageTextBlock.Visibility = Visibility.Visible;
+                successMessageTimer.Stop();
+                successMessageTimer.Start(); // Restart the timer
             }
             else
             {
@@ -358,11 +375,57 @@ namespace Setup_Application
                     selectedType = "G";
                 else
                     selectedType = "U";
+                SavePromptTextBlock.Text = $"save \"{selectedName}\" as:";
+                SavePromptTextBlock.Visibility = Visibility.Visible;
                 OperatorRadio.Visibility = Visibility.Visible;
                 AdminRadio.Visibility = Visibility.Visible;
                 OperatorRadio.IsChecked = false; // Deselect radio buttons
                 AdminRadio.IsChecked = false;
                 SaveBtn.Visibility = Visibility.Collapsed; // Hide until permission selected
+
+                // Show groups for selected user
+                if (selectedType == "U")
+                {
+                    try
+                    {
+                        var groups = (LDAP_DLL.LDAP_Setup.GetGroupsForUser(host, selectedName, username, password)).ResultArray;
+                        UserGroupsListBox.ItemsSource = groups;
+                        bool hasGroups = groups != null && groups.Length > 0;
+                        UserGroupsListBox.Visibility = hasGroups ? Visibility.Visible : Visibility.Collapsed;
+                        UserGroupsLabel.Text = $"{selectedName}'s groups";
+                        UserGroupsLabel.Visibility = hasGroups ? Visibility.Visible : Visibility.Collapsed;
+                    }
+                    catch (Exception ex)
+                    {
+                        UserGroupsListBox.ItemsSource = new[] { "Error: " + ex.Message };
+                        UserGroupsListBox.Visibility = Visibility.Visible;
+                        UserGroupsLabel.Visibility = Visibility.Collapsed;
+                    }
+                }
+                else if (selectedType == "G")
+                {
+                    try
+                    {
+                        var response = LDAP_Setup.GetUsersInGroup(host, selectedName, username, password);
+                        var users = response.ResultArray;
+                        bool hasUsers = users != null && users.Length > 0;
+                        UserGroupsListBox.ItemsSource = users;
+                        UserGroupsListBox.Visibility = hasUsers ? Visibility.Visible : Visibility.Collapsed;
+                        UserGroupsLabel.Text = $"{selectedName}'s users";
+                        UserGroupsLabel.Visibility = hasUsers ? Visibility.Visible : Visibility.Collapsed;
+                    }
+                    catch (Exception ex)
+                    {
+                        UserGroupsListBox.ItemsSource = new[] { "Error: " + ex.Message };
+                        UserGroupsListBox.Visibility = Visibility.Visible;
+                        UserGroupsLabel.Visibility = Visibility.Collapsed;
+                    }
+                }
+                else
+                {
+                    UserGroupsListBox.Visibility = Visibility.Collapsed;
+                    UserGroupsLabel.Visibility = Visibility.Collapsed;
+                }
             }
         }
 
@@ -388,6 +451,8 @@ namespace Setup_Application
                 {
                     selectedName = name;
                     selectedType = typeLabel == "(Group)" ? "G" : "U";
+                    SavePromptTextBlock.Text = $"save \"{selectedName}\" as:";
+                    SavePromptTextBlock.Visibility = Visibility.Visible;
                     OperatorRadio.Visibility = Visibility.Visible;
                     AdminRadio.Visibility = Visibility.Visible;
                     OperatorRadio.IsChecked = false;
@@ -473,6 +538,12 @@ namespace Setup_Application
                 return;
             }
 
+            var result = MessageBox.Show("Are you sure you want to delete the selected user or group?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
             string selected = PermissionsListBox.SelectedItem.ToString();
             // Extract the name and type from the display string
             var match = System.Text.RegularExpressions.Regex.Match(selected, @"^(.*) \((User|Group)\) - (Admin|Operator)$");
@@ -492,7 +563,7 @@ namespace Setup_Application
             }
             var lines = System.IO.File.ReadAllLines(iniPath).ToList();
             var newLines = lines.Where(line =>
-                !(line.Split(',').Length == 3 &&
+                !(line.Split(',').Length ==3 &&
                   line.Split(',')[0].Trim() == name &&
                   line.Split(',')[1].Trim() == type)
             ).ToList();
@@ -526,6 +597,9 @@ namespace Setup_Application
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             SuccessMessageTextBlock.Visibility = Visibility.Collapsed; // Hide success message on any button click
+            SavePromptTextBlock.Visibility = Visibility.Collapsed; // Hide save prompt on any button click
+            UserGroupsLabel.Visibility = Visibility.Collapsed; // Hide user groups label on any button click
+            UserGroupsListBox.Visibility = Visibility.Collapsed; // Hide user groups listbox on any button click
 
             // Hide permissions controls on any button click
             PermissionsListBox.Visibility = Visibility.Collapsed;
@@ -541,6 +615,26 @@ namespace Setup_Application
             {
                 clickedButton.Tag = "Highlighted";
                 _lastHighlightedButton = clickedButton;
+            }
+        }
+
+        private void UserGroupsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (UserGroupsListBox.SelectedItem != null)
+            {
+                selectedName = UserGroupsListBox.SelectedItem.ToString();
+                // Determine type based on label
+                if (UserGroupsLabel.Text.EndsWith("'s users"))
+                    selectedType = "U";
+                else if (UserGroupsLabel.Text.EndsWith("'s groups"))
+                    selectedType = "G";
+                SavePromptTextBlock.Text = $"save \"{selectedName}\" as:";
+                SavePromptTextBlock.Visibility = Visibility.Visible;
+                OperatorRadio.Visibility = Visibility.Visible;
+                AdminRadio.Visibility = Visibility.Visible;
+                OperatorRadio.IsChecked = false;
+                AdminRadio.IsChecked = false;
+                SaveBtn.Visibility = Visibility.Collapsed;
             }
         }
     }

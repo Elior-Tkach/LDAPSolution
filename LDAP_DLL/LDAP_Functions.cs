@@ -189,7 +189,7 @@ namespace LDAP_DLL
                             var dn = groupDn.ToString();
                             var cnPrefix = "CN=";
                             var cnStart = dn.IndexOf(cnPrefix, StringComparison.OrdinalIgnoreCase);
-                            if (cnStart >= 0)
+                            if (cnStart >=0)
                             {
                                 var cnEnd = dn.IndexOf(',', cnStart);
                                 if (cnEnd > cnStart)

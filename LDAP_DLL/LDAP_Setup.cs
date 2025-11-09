@@ -384,6 +384,29 @@ namespace LDAP_DLL
             return response;
         }
 
+        public static LdapResponse GetGroupsForUser(string ldapPath, string userName, string username, string password)
+        {
+            var response = new LdapResponse();
+            try
+            {
+                response.ResultArray = LDAP_Functions.GetGroupsForUserArray(ldapPath, userName, username, password);
+                response.Success = true;
+            }
+            catch (LdapFunctionsException ex)
+            {
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = ex.ErrorNumber;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.ErrorNumber = 4020;
+            }
+            return response;
+        }
+
         // Checks if a server is recorded in LDAP.ini
         public static bool IsServerRecorded()
         {
