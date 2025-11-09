@@ -2,10 +2,10 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Setup_Application"
-        Title="LDAP Application" Height="439" Width="741">
+        Title="LDAP Application" Height="285" Width="477">
     <Grid>
         <Grid.LayoutTransform>
-            <ScaleTransform ScaleX="0.75" ScaleY="0.75" />
+            <ScaleTransform ScaleX="0.5" ScaleY="0.5" />
         </Grid.LayoutTransform>
         <TabControl x:Name="MainTabControl">
             <TabItem Header="Connection">
