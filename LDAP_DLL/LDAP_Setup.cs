@@ -383,5 +383,14 @@ namespace LDAP_DLL
             }
             return response;
         }
+
+        // Checks if a server is recorded in LDAP.ini
+        public static bool IsServerRecorded()
+        {
+            string iniPath = GetIniPath();
+            if (!File.Exists(iniPath)) return false;
+            var lines = File.ReadAllLines(iniPath);
+            return lines.Any(line => line.Trim().StartsWith("Server:"));
+        }
     }
 }

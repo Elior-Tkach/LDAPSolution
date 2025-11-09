@@ -138,9 +138,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Accellix logo.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Accellix logo2.png" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +152,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Accellix logo3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Accellix logo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

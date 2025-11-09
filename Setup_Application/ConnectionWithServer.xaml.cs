@@ -12,6 +12,7 @@ namespace Setup_Application
 
         public event Action<string, string, string> CredentialsValidated;
 
+
         public ConnectionWithServer()
         {
             InitializeComponent();
@@ -59,6 +60,11 @@ namespace Setup_Application
 
         private void ContinueBtn_Click(object sender, RoutedEventArgs e)
         {
+            if (!LDAP_Setup.IsServerRecorded())
+            {
+                ShowError("Save the server before continue");
+                return;
+            }
             var host = HostTextBox.Text;
             var username = UsernameTextBox.Text;
             var password = PasswordTextBox.Password;    
