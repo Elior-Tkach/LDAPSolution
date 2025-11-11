@@ -8,7 +8,7 @@ namespace Setup_Application
     public MainWindow()
         {
             InitializeComponent();
-            var connectionControl = (ConnectionWithServer)((TabItem)MainTabControl.Items[0]).Content;
+            // Reference the ConnectionWithServer control directly by name
             connectionControl.CredentialsValidated += OnCredentialsValidated;
         }
 
@@ -17,8 +17,7 @@ namespace Setup_Application
             // Only add Setup tab if not already present
             if (MainTabControl.Items.Count < 2)
             {
-                var setupControl = new SetupPage(host,username,password);
-                // Optionally pass host, username, password to setupControl via properties or constructor
+                var setupControl = new SetupPage(host, username, password);
                 var setupTab = new TabItem
                 {
                     Header = "Setup",

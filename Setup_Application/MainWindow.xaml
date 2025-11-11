@@ -2,15 +2,15 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Setup_Application"
-        Title="LDAP Application" Height="310" Width="512">
-    <Grid>
-        <Grid.LayoutTransform>
-            <ScaleTransform ScaleX="0.5" ScaleY="0.5" />
-        </Grid.LayoutTransform>
-        <TabControl x:Name="MainTabControl">
-            <TabItem Header="Connection">
-                <local:ConnectionWithServer Margin="10,10,-38,-24" />
-            </TabItem>
-        </TabControl>
-    </Grid>
+        Title="LDAP Application" Height="350" Width="525">
+    <Viewbox Stretch="Uniform">
+        <Grid Width="1200" Height="700">
+            <TabControl x:Name="MainTabControl" Margin="0">
+                <TabItem Header="Connection">
+                    <local:ConnectionWithServer x:Name="connectionControl" Margin="0,0,5,9" />
+                </TabItem>
+                <!-- Setup tab can be added dynamically in code-behind -->
+            </TabControl>
+        </Grid>
+    </Viewbox>
 </Window>
