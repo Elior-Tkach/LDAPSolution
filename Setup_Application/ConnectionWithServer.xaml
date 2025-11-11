@@ -70,8 +70,8 @@
         </Grid.ColumnDefinitions>
         <TextBlock Text="IP address/ host name:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="25,152,5,172"/>
         <TextBox x:Name="HostTextBox" Grid.Row="4" Grid.Column="1" FontSize="24" Height="54" Margin="39,76,340,470" TextChanged="InputFieldsChanged"/>
-        <Button x:Name="TestConnectionBtn" Content="Test connection" Grid.Row="4" Grid.Column="1" FontSize="21" Width="181" Height="38" Margin="468,67,-40,495" Click="TestConnectionBtn_Click" Style="{StaticResource HighlightableButtonStyle}" Grid.ColumnSpan="2"/>
-        <Button x:Name="SaveServerBtn" Content="Save the server" Grid.Row="4" Grid.Column="1" FontSize="21" Width="181" Height="36" Margin="468,125,-40,439" Click="SaveServerBtn_Click" Style="{StaticResource HighlightableButtonStyle}" Grid.ColumnSpan="2"/>
+        <Button x:Name="TestConnectionBtn" Content="Test connection" Grid.Row="4" Grid.Column="1" FontSize="21" Width="273" Height="38" Margin="457,67,-121,495" Click="TestConnectionBtn_Click" Style="{StaticResource HighlightableButtonStyle}" Grid.ColumnSpan="2"/>
+        <Button x:Name="SaveServerBtn" Content="Save the server to an ini file" Grid.Row="4" Grid.Column="1" FontSize="21" Width="273" Height="36" Margin="457,125,-121,439" Click="SaveServerBtn_Click" Style="{StaticResource HighlightableButtonStyle}" Grid.ColumnSpan="2"/>
         <TextBlock Text="username:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="165,210,213,112" Grid.ColumnSpan="2"/>
         <TextBox x:Name="UsernameTextBox" Grid.Row="4" Grid.Column="1" FontSize="24" Height="56" Margin="39,150,340,394" TextChanged="InputFieldsChanged"/>
         <TextBlock Text="password:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="165,278,213,48" Grid.ColumnSpan="2"/>
