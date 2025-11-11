@@ -68,13 +68,13 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Text="IP address/ host name:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="20,100,10,224"/>
+        <TextBlock Text="IP address/ host name:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="25,152,5,172"/>
         <TextBox x:Name="HostTextBox" Grid.Row="4" Grid.Column="1" FontSize="24" Height="54" Margin="39,76,340,470" TextChanged="InputFieldsChanged"/>
         <Button x:Name="TestConnectionBtn" Content="Test connection" Grid.Row="4" Grid.Column="1" FontSize="21" Width="181" Height="38" Margin="468,67,-40,495" Click="TestConnectionBtn_Click" Style="{StaticResource HighlightableButtonStyle}" Grid.ColumnSpan="2"/>
         <Button x:Name="SaveServerBtn" Content="Save the server" Grid.Row="4" Grid.Column="1" FontSize="21" Width="181" Height="36" Margin="468,125,-40,439" Click="SaveServerBtn_Click" Style="{StaticResource HighlightableButtonStyle}" Grid.ColumnSpan="2"/>
-        <TextBlock Text="username:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="160,170,218,152" Grid.ColumnSpan="2"/>
+        <TextBlock Text="username:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="165,210,213,112" Grid.ColumnSpan="2"/>
         <TextBox x:Name="UsernameTextBox" Grid.Row="4" Grid.Column="1" FontSize="24" Height="56" Margin="39,150,340,394" TextChanged="InputFieldsChanged"/>
-        <TextBlock Text="password:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="160,238,218,88" Grid.ColumnSpan="2"/>
+        <TextBlock Text="password:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="165,278,213,48" Grid.ColumnSpan="2"/>
         <PasswordBox x:Name="PasswordTextBox" Grid.Row="4" Grid.Column="1" FontSize="24" Height="52" Margin="39,226,340,322" PasswordChanged="InputFieldsChanged"/>
         <Button x:Name="ContinueBtn" Content="Continue to setup" Grid.Row="4" Grid.Column="1" FontSize="23" Width="240" Height="48" Margin="474,226,-105,326" Click="ContinueBtn_Click" IsEnabled="False" Style="{StaticResource FadedButtonStyle}" Grid.ColumnSpan="2"/>
         <Border x:Name="ErrorTextBoxBorder" Grid.Row="4" Grid.ColumnSpan="3" BorderBrush="Black" BorderThickness="2" Visibility="Collapsed" Height="35" Margin="40,292,10,273">
