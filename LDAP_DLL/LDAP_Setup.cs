@@ -122,6 +122,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
                 logger.Error(ex, $"RecordLdapServerDetailsSimple exception: {response.ErrorMessage}");
+                logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}");
                 return response;
             }
             catch (Exception ex)
@@ -130,6 +131,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = 4020;
                 logger.Error(ex, $"RecordLdapServerDetailsSimple exception: {response.ErrorMessage}");
+                logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                 return response;
             }
         }
@@ -188,6 +190,7 @@ namespace LDAP_DLL
                 {
                     throw new LdapIniFileWriteException(ex.Message);
                 }
+                logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                 return response;
             }
             catch (LdapSetupException ex)
@@ -196,6 +199,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
                 logger.Error(ex, $"SaveLdapPermission exception: {response.ErrorMessage}");
+                logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                 return response;
             }
             catch (Exception ex)
@@ -204,6 +208,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = 4020;
                 logger.Error(ex, $"SaveLdapPermission exception: {response.ErrorMessage}");
+                logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                 return response;
             }
         }
@@ -232,6 +237,7 @@ namespace LDAP_DLL
                     throw new LdapIniFileWriteException(ex.Message);
                 }
                 logger.Info("Cleared all user and group permissions from INI file.");
+                logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                 return response;
             }
             catch (LdapSetupException ex)
@@ -240,6 +246,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
                 logger.Error(ex, $"ClearLdapPermissions exception: {response.ErrorMessage}");
+                logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                 return response;
             }
             catch (Exception ex)
@@ -248,6 +255,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = 4020;
                 logger.Error(ex, $"ClearLdapPermissions exception: {response.ErrorMessage}");
+                logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                 return response;
             }
         }
@@ -266,6 +274,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
             }
+            logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
             return response;
         }
 
@@ -282,6 +291,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
             }
+            logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
             return response;
         }
 
@@ -298,6 +308,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
             }
+            logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
             return response;
         }
 
@@ -314,6 +325,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
             }
+            logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
             return response;
         }
 
@@ -331,6 +343,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
             }
+            logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
             return response;
         }
 
@@ -348,6 +361,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
             }
+            logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
             return response;
         }
 
@@ -381,6 +395,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = 4020;
             }
+            logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
             return response;
         }
 
@@ -404,6 +419,7 @@ namespace LDAP_DLL
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = 4020;
             }
+            logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
             return response;
         }
 

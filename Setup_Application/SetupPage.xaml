@@ -63,7 +63,7 @@
            VerticalAlignment="Top"/>
         <RadioButton x:Name="OperatorRadio" Content="Operator" GroupName="Role" Visibility="Collapsed" Canvas.Left="549" Canvas.Top="380" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18" />
         <RadioButton x:Name="AdminRadio" Content="Administrator" GroupName="Role" Visibility="Collapsed" Canvas.Left="655" Canvas.Top="380" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18" />
-        <TextBox x:Name="SelectedTextBox" Width="292" IsReadOnly="True" Canvas.Left="337" Canvas.Top="264" Visibility="Collapsed" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center" Height="28" BorderThickness="0" Background="Transparent" />
+        <TextBox x:Name="SelectedTextBox" Width="292" IsReadOnly="True" Canvas.Left="103" Canvas.Top="302" Visibility="Collapsed" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Height="28" BorderThickness="0" Background="Transparent" />
         <Button Content="Save" x:Name="SaveBtn" Width="121" Canvas.Left="602" Visibility="Collapsed" Canvas.Top="422" Click="SaveBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="32" FontSize="20" RenderTransformOrigin="0.5,0.5" >
             <Button.RenderTransform>
                 <TransformGroup>

@@ -137,6 +137,7 @@ namespace LDAP_DLL
                     {
                         logger.Info($"User '{username}' authenticated and registered with permission '{permissionType}'.");
                         response.Success = true;
+                        logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                         return response;
                     }
                 }
@@ -151,15 +152,16 @@ namespace LDAP_DLL
                         {
                             logger.Info($"User '{username}' authenticated via group with permission '{permissionType}'.");
                             response.Success = true;
+                            logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                             return response;
                         }
                     }
                     catch (LdapUserNotInGroupException gex)
                     {
-                        // Set error number for group not found
                         response.Success = false;
                         response.ErrorMessage = gex.Message;
                         response.ErrorNumber = gex.ErrorNumber;
+                        logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                         return response;
                     }
                     catch (LdapAuthenticationException gex)
@@ -167,6 +169,7 @@ namespace LDAP_DLL
                         response.Success = false;
                         response.ErrorMessage = gex.Message;
                         response.ErrorNumber = gex.ErrorNumber;
+                        logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                         return response;
                     }
                     catch (Exception ex2)
@@ -175,6 +178,7 @@ namespace LDAP_DLL
                         response.Success = false;
                         response.ErrorMessage = ex2.Message;
                         response.ErrorNumber = 4020;
+                        logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                         return response;
                     }
                 }
@@ -185,6 +189,7 @@ namespace LDAP_DLL
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
+                logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                 return response;
             }
             catch (LdapAuthenticationException ex)
@@ -193,6 +198,7 @@ namespace LDAP_DLL
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = ex.ErrorNumber;
+                logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                 return response;
             }
             catch (Exception ex)
@@ -201,8 +207,10 @@ namespace LDAP_DLL
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
                 response.ErrorNumber = 4020;
+                logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                 return response;
             }
+            logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
             return response;
         }
     }
