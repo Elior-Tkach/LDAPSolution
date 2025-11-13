@@ -129,6 +129,6 @@ namespace LDAP_DLL
     public class LdapDirectoryQueryException : LdapFunctionsException
     {
         public LdapDirectoryQueryException(string message)
-            : base($"LDAP directory query failed: {message}", 4012) { }
+            : base($"{message}", 4012) { }
     }
 }

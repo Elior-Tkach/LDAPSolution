@@ -3,19 +3,22 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-     mc:Ignorable="d" 
-    d:DesignHeight="600" d:DesignWidth="900">
+    mc:Ignorable="d"
+    d:DesignHeight="900" d:DesignWidth="600">
+
     <UserControl.Resources>
+        <!-- Keep your existing button styles -->
         <Style x:Key="HighlightableButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="LightGray"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="12">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="10,5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -26,7 +29,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <!-- Faded style for disabled buttons -->
+
         <Style x:Key="FadedButtonStyle" TargetType="Button" BasedOn="{StaticResource HighlightableButtonStyle}">
             <Style.Triggers>
                 <Trigger Property="IsEnabled" Value="False">
@@ -36,50 +39,85 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <!-- Remove duplicate DataTemplate with same key -->
-        <DataTemplate x:Key="TreeViewHeaderTemplate">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding Name}" />
-                <TextBlock Text=" " />
-                <TextBlock Text="{Binding TypeLabel}" Foreground="Blue" FontWeight="Bold"/>
-            </StackPanel>
-        </DataTemplate>
-        <HierarchicalDataTemplate x:Key="TreeViewHeaderHierarchicalTemplate" ItemsSource="{Binding Children}">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding Name}" />
-                <TextBlock Text=" " />
-                <TextBlock Text="{Binding TypeLabel}" Foreground="Blue" FontWeight="Bold"/>
-            </StackPanel>
-        </HierarchicalDataTemplate>
     </UserControl.Resources>
+
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="Accellix logo2.png" Stretch="UniformToFill"/>
+            <ImageBrush ImageSource="Accellix logo2.png" Stretch="UniformToFill" Opacity="0.15"/>
         </Grid.Background>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
-        <TextBlock Text="IP address/ host name:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="25,152,5,172"/>
-        <TextBox x:Name="HostTextBox" Grid.Row="4" Grid.Column="1" FontSize="24" Height="54" Margin="39,76,340,470" TextChanged="InputFieldsChanged"/>
-        <Button x:Name="TestConnectionBtn" Content="Test connection" Grid.Row="4" Grid.Column="1" FontSize="21" Width="273" Height="38" Margin="457,67,-121,495" Click="TestConnectionBtn_Click" Style="{StaticResource HighlightableButtonStyle}" Grid.ColumnSpan="2"/>
-        <Button x:Name="SaveServerBtn" Content="Save the server to an ini file" Grid.Row="4" Grid.Column="1" FontSize="21" Width="273" Height="36" Margin="457,125,-121,439" Click="SaveServerBtn_Click" Style="{StaticResource HighlightableButtonStyle}" Grid.ColumnSpan="2"/>
-        <TextBlock Text="username:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="165,210,213,112" Grid.ColumnSpan="2"/>
-        <TextBox x:Name="UsernameTextBox" Grid.Row="4" Grid.Column="1" FontSize="24" Height="56" Margin="39,150,340,394" TextChanged="InputFieldsChanged"/>
-        <TextBlock Text="password:" Grid.Row="4" Grid.Column="0" FontSize="26" Margin="165,278,213,48" Grid.ColumnSpan="2"/>
-        <PasswordBox x:Name="PasswordTextBox" Grid.Row="4" Grid.Column="1" FontSize="24" Height="52" Margin="39,226,340,322" PasswordChanged="InputFieldsChanged"/>
-        <Button x:Name="ContinueBtn" Content="Continue to setup" Grid.Row="4" Grid.Column="1" FontSize="23" Width="240" Height="48" Margin="474,226,-105,326" Click="ContinueBtn_Click" IsEnabled="False" Style="{StaticResource FadedButtonStyle}" Grid.ColumnSpan="2"/>
-        <Border x:Name="ErrorTextBoxBorder" Grid.Row="4" Grid.ColumnSpan="3" BorderBrush="Black" BorderThickness="2" Visibility="Collapsed" Height="35" Margin="40,292,10,273">
-            <TextBox x:Name="ErrorTextBox" FontSize="20" Visibility="Collapsed" IsReadOnly="True" BorderThickness="0" Background="Transparent" Margin="8,0,0,-2" HorizontalAlignment="Left" Width="840" />
-        </Border>
-        <Image x:Name="StatusIcon" Visibility="Collapsed" Grid.Row="4" Grid.Column="0" Width="24" Height="32" Margin="15,327,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,0,-10">
+            <StackPanel Width="450" Margin="0,40,0,40" Height="790">
+
+                <TextBlock Text="Accellix LDAP setup application"
+                           FontSize="24" FontWeight="Bold" Height="94" Width="398"
+                           />
+
+                <!-- IP / Host -->
+                <TextBlock Text="IP address / Host name:" FontSize="20" Margin="0,0,0,8" Height="26" RenderTransformOrigin="0.5,0.5" Width="415">
+                    <TextBlock.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleY="1"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+                <TextBox x:Name="HostTextBox" FontSize="20" Height="27" TextChanged="InputFieldsChanged" Width="350" Margin="15,10,85,0"/>
+
+                <!-- Username -->
+                <TextBlock Text="Username:" FontSize="20" Margin="0,20,0,8" Height="25" Width="410"/>
+                <TextBox x:Name="UsernameTextBox" FontSize="20" Height="27" TextChanged="InputFieldsChanged" Width="350" Margin="15,10,85,0"/>
+
+                <!-- Password -->
+                <TextBlock Text="Password:" FontSize="20" Margin="0,20,0,8" Height="25" Width="405"/>
+                <PasswordBox x:Name="PasswordTextBox" FontSize="20" Height="27" PasswordChanged="InputFieldsChanged" Width="350" Margin="15,10,85,0"/>
+
+
+                <!-- Buttons -->
+                <StackPanel Orientation="Vertical" Margin="0,30,0,0" Width="395">
+
+                    <Button x:Name="TestConnectionBtn"
+                            Content="Test Connection"
+                            FontSize="18" Height="42"
+                            Margin="0,5,75,0"
+                            Click="TestConnectionBtn_Click"
+                            Style="{StaticResource HighlightableButtonStyle}"/>
+
+                    <Button x:Name="SaveServerBtn"
+                            Content="Save Server to INI File"
+                            FontSize="18" Height="42"
+                            Margin="0,5,75,0"
+                            Click="SaveServerBtn_Click"
+                            Style="{StaticResource HighlightableButtonStyle}"/>
+
+                    <Button x:Name="ContinueBtn"
+                            Content="Continue to Setup"
+                            FontSize="18" Height="42"
+                            Margin="0,5,75,0"
+                            Click="ContinueBtn_Click"
+                            IsEnabled="False"
+                            Style="{StaticResource FadedButtonStyle}"/>
+
+
+                    <!-- Error box -->
+                    <Border x:Name="ErrorTextBoxBorder" BorderBrush="Black" BorderThickness="2"
+                       Margin="0,20,65,0" Height="55" Width="328" Visibility="Collapsed" >
+                        <TextBox x:Name="ErrorTextBox"
+                             FontSize="17"
+                             IsReadOnly="True"
+                             Visibility="Collapsed"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Foreground="Red"
+                             Margin="-2,-2,36,-2"
+                             TextWrapping="Wrap"/>
+                    </Border>
+                    <Image x:Name="StatusIcon" Visibility="Collapsed" Width="48" Height="35"/>
+                    <!-- Optional status icon -->
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>
