@@ -43,14 +43,14 @@
 
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="Accellix logo2.png" Stretch="UniformToFill" Opacity="0.15"/>
+            <ImageBrush ImageSource="Accellix logo4.png" Stretch="UniformToFill" Opacity="0.15"/>
         </Grid.Background>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,0,-10">
             <StackPanel Width="450" Margin="0,40,0,40" Height="790">
 
                 <TextBlock Text="Accellix LDAP setup application"
-                           FontSize="24" FontWeight="Bold" Height="94" Width="398"
+                           FontSize="24" FontWeight="Bold" Height="84" Width="398"
                            />
 
                 <!-- IP / Host -->
