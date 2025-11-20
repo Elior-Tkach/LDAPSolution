@@ -159,26 +159,21 @@ namespace LDAP_DLL
                 var lines = File.ReadAllLines(iniPath).ToList();
                 bool found = false;
 
-                for (int i = 0; i < lines.Count; i++)
+                // Only skip adding if the exact entry already exists
+                foreach (var line in lines)
                 {
-                    var line = lines[i];
-                    if (line.StartsWith("#") || string.IsNullOrWhiteSpace(line)) continue;
-
                     var parts = line.Split(',');
-                    if (parts.Length >= 3 && parts[0] == name && parts[1] == type)
+                    if (parts.Length >=3 && parts[0] == name && parts[1] == type && parts[2] == permissionType)
                     {
-                        // Update existing entry
-                        parts[2] = permissionType;
-                        lines[i] = string.Join(",", parts);
                         found = true;
-                        logger.Info($"Updated permission for {name} ({type}) to {permissionType} in INI file.");
+                        logger.Info($"Entry for {name} ({type}) with permission {permissionType} already exists in INI file.");
                         break;
                     }
                 }
 
                 if (!found)
                 {
-                    // Append new entry
+                    // Append new entry for this permission
                     lines.Add($"{name},{type},{permissionType}");
                     logger.Info($"Added new permission entry for {name} ({type}) with permission {permissionType}.");
                 }
