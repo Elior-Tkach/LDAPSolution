@@ -49,6 +49,9 @@ namespace Setup_Application
             successMessageTimer = new DispatcherTimer();
             successMessageTimer.Interval = TimeSpan.FromSeconds(3);
             successMessageTimer.Tick += SuccessMessageTimer_Tick;
+
+            // Show all users and groups from LDAP.ini on page load
+            RefreshPermissionsListBox();
         }
 
         private void SuccessMessageTimer_Tick(object sender, EventArgs e)
@@ -353,11 +356,46 @@ namespace Setup_Application
                 SuccessMessageTextBlock.Visibility = Visibility.Visible;
                 successMessageTimer.Stop();
                 successMessageTimer.Start(); // Restart the timer
+
+                // Refresh permissions list
+                RefreshPermissionsListBox();
             }
             else
             {
                 MessageBox.Show("Error: " + response.ErrorMessage);
             }
+        }
+
+        private void RefreshPermissionsListBox()
+        {
+            string iniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "LDAP.ini");
+            if (!System.IO.File.Exists(iniPath))
+            {
+                PermissionsListBox.ItemsSource = null;
+                return;
+            }
+
+            var lines = System.IO.File.ReadAllLines(iniPath);
+            var displayList = new List<string>();
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#") || line.StartsWith("Server:") || line.StartsWith("-"))
+                    continue;
+
+                var parts = line.Split(',');
+                if (parts.Length ==3)
+                {
+                    var name = parts[0].Trim();
+                    var type = parts[1].Trim() == "U" ? "User" : "Group";
+                    var perm = parts[2].Trim() == "A" ? "Admin" : "Operator";
+                    displayList.Add($"{name} ({type}) - {perm}");
+                }
+            }
+
+            PermissionsListBox.ItemsSource = displayList;
+            PermissionsListBox.Visibility = Visibility.Visible;
+            DeleteSelectedPermissionBtn.Visibility = Visibility.Visible;
+            ClearAllPermissionsBtn.Visibility = Visibility.Visible;
         }
 
         private void GroupNameInputTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -444,12 +482,12 @@ namespace Setup_Application
                         if (tb.Text.StartsWith("("))
                             typeLabel = tb.Text;
                         else if (!string.IsNullOrWhiteSpace(tb.Text) && tb.Text != " ")
-                            name = tb.Text;
+                            name = tb.Text.Trim(); // Ensure no whitespace
                     }
                 }
                 if (typeLabel == "(Group)" || typeLabel == "(User)")
                 {
-                    selectedName = name;
+                    selectedName = name; // Make sure this is the actual user/group name
                     selectedType = typeLabel == "(Group)" ? "G" : "U";
                     SavePromptTextBlock.Text = $"save \"{selectedName}\" as:";
                     SavePromptTextBlock.Visibility = Visibility.Visible;
@@ -601,10 +639,10 @@ namespace Setup_Application
             UserGroupsLabel.Visibility = Visibility.Collapsed; // Hide user groups label on any button click
             UserGroupsListBox.Visibility = Visibility.Collapsed; // Hide user groups listbox on any button click
 
-            // Hide permissions controls on any button click
-            PermissionsListBox.Visibility = Visibility.Collapsed;
-            DeleteSelectedPermissionBtn.Visibility = Visibility.Collapsed;
-            ClearAllPermissionsBtn.Visibility = Visibility.Collapsed;
+            // Permissions controls should always be visible
+            PermissionsListBox.Visibility = Visibility.Visible;
+            DeleteSelectedPermissionBtn.Visibility = Visibility.Visible;
+            ClearAllPermissionsBtn.Visibility = Visibility.Visible;
             ClosePermissionsBtn.Visibility = Visibility.Collapsed;
 
             if (_lastHighlightedButton != null)

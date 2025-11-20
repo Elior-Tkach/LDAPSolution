@@ -43,28 +43,25 @@
         </HierarchicalDataTemplate>
     </UserControl.Resources>
     <Canvas Margin="99,10,59,10">
-        <Canvas.Background>
-            <ImageBrush ImageSource="/Accellix logo.png" Stretch="UniformToFill"/>
-        </Canvas.Background>
         <!-- All content from SetupPage.xaml except Window root -->
-        <Button Content="Find User" Style="{StaticResource HighlightableButtonStyle}" Width="166" Canvas.Left="-76" Canvas.Top="105" Click="FindUserBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Center" Height="46" FontSize="20" Tag="Highlightable"/>
-        <Button Content="Find Group" Style="{StaticResource HighlightableButtonStyle}" Width="160" Canvas.Left="104" Canvas.Top="104" Click="FindGroupBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Center" Height="47" FontSize="20" Tag="Highlightable"/>
-        <Button Content="Choose group or user from the tree" Style="{StaticResource HighlightableButtonStyle}" Width="340" Canvas.Left="-76" Canvas.Top="163" Click="ChooseGroupFromListBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Center" Height="47" FontSize="20" Tag="Highlightable"/>
+        <Button Content="Find User" Style="{StaticResource HighlightableButtonStyle}" Width="97" Canvas.Left="-91" Canvas.Top="-47" Click="FindUserBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" FontSize="18" Tag="Highlightable"/>
+        <Button Content="Find Group" Style="{StaticResource HighlightableButtonStyle}" Width="106" Canvas.Left="36" Canvas.Top="-47" Click="FindGroupBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="27" FontSize="18" Tag="Highlightable"/>
+        <Button Content="Tree View" Style="{StaticResource HighlightableButtonStyle}" Width="115" Canvas.Top="-47" Click="ChooseGroupFromListBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" FontSize="18" Tag="Highlightable" Canvas.Left="171"/>
         <TextBlock x:Name="SavePromptTextBlock"
            Text=""
            Visibility="Collapsed"
-           FontSize="18"
+           FontSize="16"
            FontWeight="Bold"
-           Canvas.Left="549"
-           Canvas.Top="350"
+           Canvas.Left="-77"
+           Canvas.Top="237"
            Width="300"
            Height="28"
-           HorizontalAlignment="Left"
+           HorizontalAlignment="Center"
            VerticalAlignment="Top"/>
-        <RadioButton x:Name="OperatorRadio" Content="Operator" GroupName="Role" Visibility="Collapsed" Canvas.Left="549" Canvas.Top="380" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18" />
-        <RadioButton x:Name="AdminRadio" Content="Administrator" GroupName="Role" Visibility="Collapsed" Canvas.Left="655" Canvas.Top="380" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18" />
-        <TextBox x:Name="SelectedTextBox" Width="292" IsReadOnly="True" Canvas.Left="103" Canvas.Top="302" Visibility="Collapsed" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top" Height="28" BorderThickness="0" Background="Transparent" />
-        <Button Content="Save" x:Name="SaveBtn" Width="121" Canvas.Left="602" Visibility="Collapsed" Canvas.Top="422" Click="SaveBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="32" FontSize="20" RenderTransformOrigin="0.5,0.5" >
+        <RadioButton x:Name="OperatorRadio" Content="Operator" GroupName="Role" Visibility="Collapsed" Canvas.Left="-44" Canvas.Top="270" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="18" />
+        <RadioButton x:Name="AdminRadio" Content="Administrator" GroupName="Role" Visibility="Collapsed" Canvas.Left="62" Canvas.Top="270" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="18" />
+        <TextBox x:Name="SelectedTextBox" Width="325" IsReadOnly="True" Canvas.Left="-91" Canvas.Top="35" Visibility="Collapsed" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center" Height="28" BorderThickness="0" Background="Transparent" />
+        <Button Content="Save" x:Name="SaveBtn" Width="91" Canvas.Left="25" Visibility="Collapsed" Canvas.Top="297" Click="SaveBtn_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="22" FontSize="17" RenderTransformOrigin="0.5,0.5" >
             <Button.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -75,45 +72,55 @@
             </Button.RenderTransform>
         </Button>
         <!-- Dynamic Controls -->
-        <TextBlock x:Name="UserNamePromptTextBlock" Text="Enter user name:" Canvas.Left="-46" Canvas.Top="246" Visibility="Collapsed" FontSize="18" Height="56" Width="329"/>
-        <TextBox x:Name="UserNameInputTextBox" Width="292" Height="34" Canvas.Left="103" Canvas.Top="246" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"  KeyDown="UserNameInputTextBox_KeyDown" FontSize="17"/>
-        <TextBlock x:Name="GroupNamePromptTextBlock" Text="Enter group name:" Canvas.Left="-61" Canvas.Top="246" Visibility="Collapsed" FontSize="18" Height="56" Width="329" HorizontalAlignment="Left" VerticalAlignment="Top" />
-        <TextBox x:Name="GroupNameInputTextBox" Width="291" Height="34" Canvas.Left="104" Canvas.Top="246" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"  KeyDown="GroupNameInputTextBox_KeyDown" FontSize="17" TextChanged="GroupNameInputTextBox_TextChanged"/>
-        <ListBox x:Name="UserSelectListBox" Width="291" Height="183" Canvas.Left="104" Canvas.Top="285" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16"/>
+        <TextBlock x:Name="UserNamePromptTextBlock" Text="Enter user name:" Canvas.Left="-91" Visibility="Collapsed" FontSize="16" Height="56" Width="328" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <TextBox x:Name="UserNameInputTextBox" Width="198" Height="24" Canvas.Left="36" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Center"  KeyDown="UserNameInputTextBox_KeyDown" FontSize="17"/>
+        <TextBlock x:Name="GroupNamePromptTextBlock" Text="Enter group name:" Canvas.Left="-100" Visibility="Collapsed" FontSize="16" Height="56" Width="328" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <TextBox x:Name="GroupNameInputTextBox" Width="198" Height="24" Canvas.Left="36" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"  KeyDown="GroupNameInputTextBox_KeyDown" FontSize="17" TextChanged="GroupNameInputTextBox_TextChanged"/>
+        <ListBox x:Name="UserSelectListBox" Width="202" Height="88" Canvas.Left="34" Canvas.Top="24" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16"/>
+        <TextBlock x:Name="PermissionsListLabel"
+           Text="Users and groups in the ini file:"
+           FontSize="16"
+           FontWeight="Bold"
+           Canvas.Left="-49"
+           Canvas.Top="366"
+           Width="390"
+           Height="24"
+           HorizontalAlignment="Left"
+           VerticalAlignment="Top"/>
         <Button Content="Show all users and groups with permission" Style="{StaticResource HighlightableButtonStyle}" Width="386" Canvas.Left="444" Canvas.Top="100" Click="ShowPermissionsBtn_Click" Height="40" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Top" Background="LightGreen"/>
-        <ListBox x:Name="PermissionsListBox" Width="600" Height="200" Canvas.Left="49" Canvas.Top="232" Visibility="Collapsed" FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <Button x:Name="DeleteSelectedPermissionBtn" Content="Delete Selected" Width="120" Height="28" Canvas.Left="669" Canvas.Top="234"
-           Visibility="Collapsed"  Click="DeleteSelectedPermissionBtn_Click" FontSize="16" Background="Orange" HorizontalAlignment="Left" VerticalAlignment="Top" Style="{StaticResource HighlightableButtonStyle}"/>
-        <Button x:Name="ClearAllPermissionsBtn" Content="Clear All" Width="120" Height="28" Canvas.Left="669" Canvas.Top="267"
-           Visibility="Collapsed"  Click="ClearAllPermissionsBtn_Click" FontSize="16" Background="Red" HorizontalAlignment="Left" VerticalAlignment="Top" Style="{StaticResource HighlightableButtonStyle}"/>
-        <Button x:Name="ClosePermissionsBtn" Content="X" Width="28" Height="28" Canvas.Left="623" Canvas.Top="234"
-         Visibility="Collapsed" Click="ClosePermissionsBtn_Click" FontSize="16" Background="LightGray" Foreground="Red" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <ListBox x:Name="PermissionsListBox" Width="390" Height="143" Canvas.Left="-99" Canvas.Top="390"  FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Button x:Name="DeleteSelectedPermissionBtn" Content="Delete Selected" Width="126" Height="28" Canvas.Left="-42" Canvas.Top="538"
+             Click="DeleteSelectedPermissionBtn_Click" FontSize="16" Background="Orange" HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource HighlightableButtonStyle}"/>
+        <Button x:Name="ClearAllPermissionsBtn" Content="Clear All" Width="127" Height="28" Canvas.Left="96" Canvas.Top="538"
+             Click="ClearAllPermissionsBtn_Click" FontSize="16" Background="Red" HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource HighlightableButtonStyle}"/>
+        <Button x:Name="ClosePermissionsBtn" Content="X" Width="16" Height="20" Canvas.Left="275" Canvas.Top="390"
+          Click="ClosePermissionsBtn_Click" FontSize="16" Background="LightGray" Foreground="Red" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="1.6,0.75"/>
         <ListBox x:Name="UserGroupsListBox"
-         Width="290"
-         Height="120"
-         Canvas.Left="517"
-         Canvas.Top="186"
+         Width="200"
+         Height="81"
+         Canvas.Left="35"
+         Canvas.Top="149"
          Visibility="Collapsed"
          FontSize="16"
-         HorizontalAlignment="Left"
+         HorizontalAlignment="Center"
          VerticalAlignment="Top"/>
         <TextBlock x:Name="UserGroupsLabel"
            Text=""
            Visibility="Collapsed"
            FontSize="16"
            FontWeight="Bold"
-           Canvas.Left="517"
-           Canvas.Top="160"
+           Canvas.Left="-56"
+           Canvas.Top="120"
            Width="290"
            Height="24"
            HorizontalAlignment="Left"
            VerticalAlignment="Top"/>
         <TreeView x:Name="GroupTreeView"
                   ItemTemplate="{StaticResource TreeViewHeaderTemplate}"
-                  Width="490"
+                  Width="390"
                   Height="220"
-                  Canvas.Left="-30"
-                  Canvas.Top="236"
+                  Canvas.Left="-99"
+                  Canvas.Top="-10"
                   Visibility="Collapsed"
                   FontSize="16"
                   HorizontalAlignment="Left"
@@ -123,9 +130,9 @@
            Visibility="Collapsed"
            FontSize="18"
            Foreground="Green"
-           Canvas.Left="568"
-           Canvas.Top="458"
-           FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top">
+           Canvas.Left="-77"
+           Canvas.Top="320"
+           FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Top">
             <TextBlock.Inlines>
                 <Run Text="✔ " FontSize="20"/>
                 <Run x:Name="SuccessMessageRun" Text="User/Group saved successfully"/>
