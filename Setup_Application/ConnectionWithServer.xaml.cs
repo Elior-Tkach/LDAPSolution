@@ -16,6 +16,31 @@ namespace Setup_Application
         public ConnectionWithServer()
         {
             InitializeComponent();
+
+            // Load IP from LDAP.ini if it exists
+            try
+            {
+                string iniPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LDAP.ini");
+                if (System.IO.File.Exists(iniPath))
+                {
+                    var lines = System.IO.File.ReadAllLines(iniPath);
+                    foreach (var line in lines)
+                    {
+                        if (line.StartsWith("Server: IP="))
+                        {
+                            var IPPart = line.Split(',')[0];
+                            var IPEq = IPPart.IndexOf("IP=");
+                            if (IPEq >=0)
+                            {
+                                string ip = IPPart.Substring(IPEq +3).Trim('=', ' ');
+                                HostTextBox.Text = ip;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            catch { /* Ignore errors, just don't prefill */ }
         }
 
         private void ShowError(string message)

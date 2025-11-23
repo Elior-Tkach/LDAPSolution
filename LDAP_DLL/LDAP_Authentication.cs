@@ -17,6 +17,10 @@ namespace LDAP_DLL
         {
         }
 
+        /// <summary>
+        /// Helper to get LDAP path (host) from INI file header.
+        /// </summary>
+        /// <returns>The LDAP path as a string.</returns>
         // Helper to get LDAP path (host) from INI file header
         private static string GetLdapPathFromIni()
         {
@@ -26,10 +30,10 @@ namespace LDAP_DLL
             var lines = File.ReadAllLines(iniPath);
             foreach (var line in lines)
             {
-                if (line.StartsWith("Server: IPs="))
+                if (line.StartsWith("Server: IP="))
                 {
                     var IPPart = line.Split(',')[0];
-                    var IPEq = IPPart.IndexOf("IPs=");
+                    var IPEq = IPPart.IndexOf("IP=");
                     if (IPEq >= 0)
                     {
                         return IPPart.Substring(IPEq + 4).Trim();
@@ -39,6 +43,12 @@ namespace LDAP_DLL
             throw new LdapIpNotFoundException();
         }
 
+        /// <summary>
+        /// Checks if a user is registered in the INI file with the expected permission type.
+        /// </summary>
+        /// <param name="userName">The user name to check.</param>
+        /// <param name="expectedPermissionType">The expected permission type (e.g., "A" or "O").</param>
+        /// <returns>True if the user is registered with the expected permission; otherwise, throws an exception.</returns>
         internal static bool IsUserRegistered(string userName, string expectedPermissionType)
         {
             logger.Info($"IsUserRegistered called with userName: {userName}, expectedPermissionType: {expectedPermissionType}");
@@ -48,6 +58,7 @@ namespace LDAP_DLL
                 throw new LdapIniFileNotFoundException();
             }
             var lines = File.ReadAllLines(iniPath);
+            bool userFound = false;
             foreach (var line in lines)
             {
                 if (line.StartsWith("#") || line.StartsWith("Server:")) continue;
@@ -61,13 +72,25 @@ namespace LDAP_DLL
                     }
                     else
                     {
-                        throw new LdapPermissionMismatchException(expectedPermissionType, parts[2]);
+                        userFound = true;
                     }
                 }
+            }
+            if (userFound)
+            {
+                throw new LdapPermissionMismatchException(expectedPermissionType, "other");
             }
             throw new LdapUserNotFoundException(userName);
         }
 
+        /// <summary>
+        /// Checks if a user is in a registered group with the specified permission type.
+        /// </summary>
+        /// <param name="userName">The user name to check.</param>
+        /// <param name="username">The LDAP username for authentication.</param>
+        /// <param name="password">The LDAP password for authentication.</param>
+        /// <param name="permissionType">The required permission type (e.g., "A" or "O").</param>
+        /// <returns>True if the user is in a group with the required permission; otherwise, throws an exception.</returns>
         internal static bool IsUserInRegisteredGroup(string userName, string username, string password, string permissionType)
         {
             logger.Info($"IsUserInRegisteredGroup called with userName: {userName}, permissionType: {permissionType}");
@@ -116,6 +139,13 @@ namespace LDAP_DLL
             throw new LdapNoRegisteredGroupException(permissionType);
         }
 
+        /// <summary>
+        /// Authenticates a user against LDAP and checks for the required permission, either directly or via group membership.
+        /// </summary>
+        /// <param name="username">The username to authenticate.</param>
+        /// <param name="password">The password for authentication.</param>
+        /// <param name="permissionType">The required permission type (e.g., "A" or "O").</param>
+        /// <returns>A LdapResponse object indicating the result of the authentication and permission check.</returns>
         public static LdapResponse AuthenticateUser(string username, string password, string permissionType)
         {
             logger.Info($"AuthenticateUser called with username: {username}, permissionType: {permissionType}");
@@ -156,20 +186,23 @@ namespace LDAP_DLL
                             return response;
                         }
                     }
-                    catch (LdapUserNotInGroupException gex)
-                    {
-                        response.Success = false;
-                        response.ErrorMessage = gex.Message;
-                        response.ErrorNumber = gex.ErrorNumber;
-                        logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
-                        return response;
-                    }
                     catch (LdapAuthenticationException gex)
                     {
-                        response.Success = false;
-                        response.ErrorMessage = gex.Message;
-                        response.ErrorNumber = gex.ErrorNumber;
-                        logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
+                        // If the original exception is permission mismatch (4001), return its message and error number
+                        if (ex.ErrorNumber ==4001)
+                        {
+                            response.Success = false;
+                            response.ErrorMessage = ex.Message;
+                            response.ErrorNumber = ex.ErrorNumber;
+                            logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.ErrorMessage = gex.Message;
+                            response.ErrorNumber = gex.ErrorNumber;
+                        }
+                        logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{{{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}}}]");
                         return response;
                     }
                     catch (Exception ex2)

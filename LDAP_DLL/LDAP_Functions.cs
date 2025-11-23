@@ -14,6 +14,11 @@ namespace LDAP_DLL
         // -------------------------
         // Basic Ping method
         // -------------------------
+        /// <summary>
+        /// Pings the specified host to check if it is reachable and logs the result.
+        /// </summary>
+        /// <param name="host">The host name or IP address to ping.</param>
+        /// <returns>True if the ping is successful; otherwise, throws an exception.</returns>
         public static bool PingServerSimple(string host)
         {
             logger.Info($"PingServerSimple called with host: {host}");
@@ -65,6 +70,12 @@ namespace LDAP_DLL
             }
         }
 
+        /// <summary>
+        /// Tests the LDAP connection by attempting to bind with the provided credentials.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="username">The username for authentication.</param>
+        /// <param name="password">The password for authentication.</param>
         public static void TestLdapConnection(string ldapPath, string username, string password)
         {
             try
@@ -85,6 +96,13 @@ namespace LDAP_DLL
         // -------------------------
         // Group & User Queries
         // -------------------------
+        /// <summary>
+        /// Gets all LDAP groups from the directory for the specified credentials.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="username">The username for authentication.</param>
+        /// <param name="password">The password for authentication.</param>
+        /// <returns>An array of group names.</returns>
         public static string[] GetAllLdapGroupsArray(string ldapPath, string username, string password)
         {
             logger.Info($"GetAllLdapGroupsArray called with ldapPath: {ldapPath}, username: {username}");
@@ -118,6 +136,14 @@ namespace LDAP_DLL
             }
         }
 
+        /// <summary>
+        /// Gets all users in a specified group, including their username, first name, and last name.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="groupName">The group name to search for.</param>
+        /// <param name="username">The username for authentication.</param>
+        /// <param name="password">The password for authentication.</param>
+        /// <returns>An array of strings in the format "username,FirstName,LastName" for each user in the group.</returns>
         public static string[] GetUsersInGroupArray(string ldapPath, string groupName, string username, string password)
         {
             logger.Info($"GetUsersInGroupArray called with ldapPath: {ldapPath}, groupName: {groupName}, username: {username}");
@@ -144,8 +170,10 @@ namespace LDAP_DLL
                             using (var memberEntry = new DirectoryEntry($"{serverPath}/{memberDn}", username, password))
                             {
                                 var userAccount = memberEntry.Properties["sAMAccountName"].Value as string;
+                                var givenName = memberEntry.Properties["givenName"].Value as string;
+                                var sn = memberEntry.Properties["sn"].Value as string;
                                 if (!string.IsNullOrEmpty(userAccount))
-                                    users.Add(userAccount);
+                                    users.Add($"{userAccount},{givenName},{sn}");
                             }
                         }
                     }
@@ -164,6 +192,14 @@ namespace LDAP_DLL
             }
         }
 
+        /// <summary>
+        /// Gets all groups for a specified user.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="userName">The user name to search for.</param>
+        /// <param name="username">The username for authentication.</param>
+        /// <param name="password">The password for authentication.</param>
+        /// <returns>An array of group names the user belongs to.</returns>
         public static string[] GetGroupsForUserArray(string ldapPath, string userName, string username, string password)
         {
             logger.Info($"GetGroupsForUserArray called with ldapPath: {ldapPath}, userName: {userName}, username: {username}");
@@ -222,10 +258,18 @@ namespace LDAP_DLL
         // -------------------------
         // Lookup by Username/Group
         // -------------------------
+        /// <summary>
+        /// Gets all users matching the specified user name, including their username, first name, and last name.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="userName">The user name to search for.</param>
+        /// <param name="username">The username for authentication.</param>
+        /// <param name="password">The password for authentication.</param>
+        /// <returns>An array of strings in the format "username,FirstName,LastName" for each user found.</returns>
         public static string[] GetUserByUserNameSimple(string ldapPath, string userName, string username, string password)
         {
             logger.Info($"GetUserByUserNameSimple called with ldapPath: {ldapPath}, userName: {userName}, username: {username}");
-            var userNames = new List<string>();
+            var userInfos = new List<string>();
             try
             {
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
@@ -235,8 +279,10 @@ namespace LDAP_DLL
                 {
                     searcher.Filter = $"(&(objectClass=user)(|(sAMAccountName=*{userName}*)(givenName=*{userName}*)(sn=*{userName}*)(cn=*{userName}*)(displayName=*{userName}*)))";
                     searcher.PropertiesToLoad.Add("sAMAccountName");
+                    searcher.PropertiesToLoad.Add("givenName");
+                    searcher.PropertiesToLoad.Add("sn");
                     var results = searcher.FindAll();
-                    if (results == null || results.Count == 0)
+                    if (results == null || results.Count ==0)
                     {
                         throw new LdapDirectoryUserNotFoundException(userName);
                     }
@@ -244,13 +290,15 @@ namespace LDAP_DLL
                     {
                         var userEntry = result.GetDirectoryEntry();
                         var sAMAccountName = GetProperty(userEntry, "sAMAccountName");
+                        var givenName = GetProperty(userEntry, "givenName");
+                        var sn = GetProperty(userEntry, "sn");
                         if (!string.IsNullOrEmpty(sAMAccountName))
                         {
-                            userNames.Add(sAMAccountName);
+                            userInfos.Add($"{sAMAccountName},{givenName},{sn}");
                         }
                     }
-                    logger.Info($"Users found: {string.Join(", ", userNames)}");
-                    return userNames.ToArray();
+                    logger.Info($"Users found: {string.Join(", ", userInfos)}");
+                    return userInfos.ToArray();
                 }
             }
             catch (LdapDirectoryUserNotFoundException)
@@ -264,6 +312,14 @@ namespace LDAP_DLL
             }
         }
 
+        /// <summary>
+        /// Gets all groups matching the specified group name.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="groupName">The group name to search for.</param>
+        /// <param name="username">The username for authentication.</param>
+        /// <param name="password">The password for authentication.</param>
+        /// <returns>An array of group names found.</returns>
         public static string[] GetGroupByNameSimple(string ldapPath, string groupName, string username, string password)
         {
             logger.Info($"GetGroupByNameSimple called with ldapPath: {ldapPath}, groupName: {groupName}, username: {username}");
@@ -318,6 +374,14 @@ namespace LDAP_DLL
             }
         }
 
+        /// <summary>
+        /// Gets all members (users and groups) of a specified group.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="groupName">The group name to search for.</param>
+        /// <param name="username">The username for authentication.</param>
+        /// <param name="password">The password for authentication.</param>
+        /// <returns>A list of LdapGroupMember objects representing the group's members.</returns>
         public static List<LdapGroupMember> GetAllGroupMembers(string ldapPath, string groupName, string username, string password)
         {
             var members = new List<LdapGroupMember>();

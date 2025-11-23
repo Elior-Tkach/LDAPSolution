@@ -9,6 +9,12 @@ using System;
 
 namespace Setup_Application
 {
+    /// <summary>
+    /// Interaction logic for the SetupPage user control, which manages user and group permissions setup.
+    /// </summary>
+    /// <param name="host">The LDAP server host.</param>
+    /// <param name="username">The LDAP username for authentication.</param>
+    /// <param name="password">The LDAP password for authentication.</param>
     public partial class SetupPage : UserControl
     {
         private readonly string host;
@@ -17,8 +23,7 @@ namespace Setup_Application
         private string selectedName = "";
         private string selectedType = "U"; // U=user, G=group
 
-        // Add a mode flag to distinguish between group search and user-in-group search
-        private enum GroupInputMode { None, FindGroup, UsersInGroup }
+        private enum GroupInputMode { None, FindGroup }
         private GroupInputMode groupInputMode = GroupInputMode.None;
 
         private Button _lastHighlightedButton;
@@ -54,12 +59,18 @@ namespace Setup_Application
             RefreshPermissionsListBox();
         }
 
+        /// <summary>
+        /// Handles the timer tick to hide the success message.
+        /// </summary>
         private void SuccessMessageTimer_Tick(object sender, EventArgs e)
         {
             SuccessMessageTextBlock.Visibility = Visibility.Collapsed;
             successMessageTimer.Stop();
         }
 
+        /// <summary>
+        /// Hides all dynamic controls related to user and group input.
+        /// </summary>
         private void HideAllDynamicControls()
         {
             UserNamePromptTextBlock.Visibility = Visibility.Collapsed;
@@ -69,6 +80,9 @@ namespace Setup_Application
             GroupTreeView.Visibility = Visibility.Collapsed;
         }
 
+        /// <summary>
+        /// Hides permission-related controls.
+        /// </summary>
         private void HidePermissionControls()
         {
             OperatorRadio.Visibility = Visibility.Collapsed;
@@ -76,6 +90,9 @@ namespace Setup_Application
             SaveBtn.Visibility = Visibility.Collapsed;
         }
 
+        /// <summary>
+        /// Hides all textboxes, listboxes, and textblocks.
+        /// </summary>
         private void HideAllTextAndListBoxesAndTextBlocks()
         {
             SelectedTextBox.Visibility = Visibility.Collapsed;
@@ -87,6 +104,9 @@ namespace Setup_Application
             GroupNamePromptTextBlock.Visibility = Visibility.Collapsed;
         }
 
+        /// <summary>
+        /// Handles the Find User button click event.
+        /// </summary>
         private void FindUserBtn_Click(object sender, RoutedEventArgs e)
         {
             Button_Click(sender, e); // Highlight logic
@@ -96,8 +116,12 @@ namespace Setup_Application
             SelectedTextBox.Visibility = Visibility.Collapsed;
             UserSelectListBox.Visibility = Visibility.Collapsed;
             HidePermissionControls();
+            groupInputMode = GroupInputMode.None; // Reset mode when searching for user
         }
 
+        /// <summary>
+        /// Handles the Find Group button click event.
+        /// </summary>
         private void FindGroupBtn_Click(object sender, RoutedEventArgs e)
         {
             Button_Click(sender, e); // Highlight logic
@@ -112,6 +136,9 @@ namespace Setup_Application
         }
 
 
+        /// <summary>
+        /// Handles the Choose Group From List button click event.
+        /// </summary>
         private void ChooseGroupFromListBtn_Click(object sender, RoutedEventArgs e)
         {
             Button_Click(sender, e); // Highlight logic
@@ -146,6 +173,11 @@ namespace Setup_Application
         }
 
              // Recursive helper to build group-member hierarchy
+        /// <summary>
+        /// Recursively builds the group-member hierarchy as TreeNodeData.
+        /// </summary>
+        /// <param name="groupName">The group name to build the tree for.</param>
+        /// <returns>A TreeNodeData representing the group and its members.</returns>
         private TreeNodeData BuildGroupTreeRecursiveData(string groupName)
         {
             var node = new TreeNodeData { Name = groupName, TypeLabel = "(Group)" };
@@ -175,6 +207,11 @@ namespace Setup_Application
             return node;
         }
 
+        /// <summary>
+        /// Recursively builds the group-member hierarchy as a TreeViewItem.
+        /// </summary>
+        /// <param name="groupName">The group name to build the tree for.</param>
+        /// <returns>A TreeViewItem representing the group and its members.</returns>
         private TreeViewItem BuildGroupTreeRecursive(string groupName)
         {
             // Create a StackPanel for custom coloring
@@ -211,6 +248,9 @@ namespace Setup_Application
             return groupItem;
         }
 
+        /// <summary>
+        /// Handles the KeyDown event for the user name input textbox (Enter to search user).
+        /// </summary>
         private void UserNameInputTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -248,6 +288,9 @@ namespace Setup_Application
             }
         }
 
+        /// <summary>
+        /// Handles the KeyDown event for the group name input textbox (Enter to search group or users in group).
+        /// </summary>
         private void GroupNameInputTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -255,30 +298,7 @@ namespace Setup_Application
                 var groupName = GroupNameInputTextBox.Text;
                 if (!string.IsNullOrWhiteSpace(groupName))
                 {
-                    if (groupInputMode == GroupInputMode.UsersInGroup)
-                    {
-                        var response = LDAP_Setup.GetUsersInGroup(host, groupName, username, password);
-                        if (!string.IsNullOrEmpty(response.ErrorMessage))
-                        {
-                            SelectedTextBox.Text = response.ErrorMessage;
-                            SelectedTextBox.Visibility = Visibility.Visible;
-                            UserSelectListBox.Visibility = Visibility.Collapsed;
-                            return;
-                        }
-                        if (response.ResultArray != null && response.ResultArray.Length > 0)
-                        {
-                            UserSelectListBox.ItemsSource = response.ResultArray;
-                            UserSelectListBox.Visibility = Visibility.Visible;
-                            SelectedTextBox.Visibility = Visibility.Collapsed;
-                        }
-                        else
-                        {
-                            UserSelectListBox.Visibility = Visibility.Collapsed;
-                            SelectedTextBox.Text = $"No users found in group: {groupName}";
-                            SelectedTextBox.Visibility = Visibility.Visible;
-                        }
-                    }
-                    else if (groupInputMode == GroupInputMode.FindGroup)
+                    if (groupInputMode == GroupInputMode.FindGroup)
                     {
                         var response = LDAP_Setup.GetGroup(host, groupName, username, password);
                         if (!string.IsNullOrEmpty(response.ErrorMessage))
@@ -311,6 +331,9 @@ namespace Setup_Application
             }
         }
 
+        /// <summary>
+        /// Handles the Clear All button click event to remove all users and groups.
+        /// </summary>
         private void ClearAllBtn_Click(object sender, RoutedEventArgs e)
         {
             Button_Click(sender, e); // Highlight logic
@@ -331,6 +354,9 @@ namespace Setup_Application
             }
         }
 
+        /// <summary>
+        /// Handles the Save button click event to save the selected user or group with the chosen permission.
+        /// </summary>
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(selectedName))
@@ -339,8 +365,36 @@ namespace Setup_Application
                 return;
             }
 
+            // Ensure only the username is saved
+            var usernameToSave = selectedName.Contains(",") ? selectedName.Split(',')[0] : selectedName;
             string permission = OperatorRadio.IsChecked == true ? "O" : "A";
-            var response = LDAP_Setup.SaveLdapPermission(selectedName, selectedType, permission);
+            string iniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "LDAP.ini");
+            if (System.IO.File.Exists(iniPath))
+            {
+                var lines = System.IO.File.ReadAllLines(iniPath);
+                foreach (var line in lines)
+                {
+                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#") || line.StartsWith("Server:") || line.StartsWith("-"))
+                        continue;
+                    var parts = line.Split(',');
+                    if (parts.Length ==3)
+                    {
+                        var name = parts[0].Trim();
+                        var type = parts[1].Trim();
+                        var perm = parts[2].Trim();
+                        if (name == usernameToSave && type == selectedType && perm == permission)
+                        {
+                            SuccessMessageRun.Text = (selectedType == "G" ? "Group" : "User") + " with this permission already exists";
+                            SuccessMessageTextBlock.Visibility = Visibility.Visible;
+                            successMessageTimer.Stop();
+                            successMessageTimer.Start();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            var response = LDAP_Setup.SaveLdapPermission(usernameToSave, selectedType, permission);
 
             if (!string.IsNullOrEmpty(response.ErrorMessage))
             {
@@ -366,6 +420,9 @@ namespace Setup_Application
             }
         }
 
+        /// <summary>
+        /// Refreshes the permissions list box from the LDAP.ini file.
+        /// </summary>
         private void RefreshPermissionsListBox()
         {
             string iniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "LDAP.ini");
@@ -398,21 +455,32 @@ namespace Setup_Application
             ClearAllPermissionsBtn.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Handles text changed event for the group name input textbox (currently unused).
+        /// </summary>
         private void GroupNameInputTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
 
         }
 
 
+        /// <summary>
+        /// Handles selection change in the user select list box.
+        /// </summary>
         private void UserSelectListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (UserSelectListBox.SelectedItem != null)
             {
-                selectedName = UserSelectListBox.SelectedItem.ToString();
-                if (groupInputMode == GroupInputMode.FindGroup)
+                var selected = UserSelectListBox.SelectedItem.ToString();
+                var usernameOnly = selected.Contains(",") ? selected.Split(',')[0] : selected;
+                selectedName = usernameOnly;
+
+                // Determine type based on context and item format
+                if (groupInputMode == GroupInputMode.FindGroup && !selected.Contains(","))
                     selectedType = "G";
                 else
                     selectedType = "U";
+
                 SavePromptTextBlock.Text = $"save \"{selectedName}\" as:";
                 SavePromptTextBlock.Visibility = Visibility.Visible;
                 OperatorRadio.Visibility = Visibility.Visible;
@@ -421,14 +489,14 @@ namespace Setup_Application
                 AdminRadio.IsChecked = false;
                 SaveBtn.Visibility = Visibility.Collapsed; // Hide until permission selected
 
-                // Show groups for selected user
                 if (selectedType == "U")
                 {
+                    // Show groups for selected user
                     try
                     {
                         var groups = (LDAP_DLL.LDAP_Setup.GetGroupsForUser(host, selectedName, username, password)).ResultArray;
                         UserGroupsListBox.ItemsSource = groups;
-                        bool hasGroups = groups != null && groups.Length > 0;
+                        bool hasGroups = groups != null && groups.Length >0;
                         UserGroupsListBox.Visibility = hasGroups ? Visibility.Visible : Visibility.Collapsed;
                         UserGroupsLabel.Text = $"{selectedName}'s groups";
                         UserGroupsLabel.Visibility = hasGroups ? Visibility.Visible : Visibility.Collapsed;
@@ -442,11 +510,12 @@ namespace Setup_Application
                 }
                 else if (selectedType == "G")
                 {
+                    // Show users for selected group
                     try
                     {
                         var response = LDAP_Setup.GetUsersInGroup(host, selectedName, username, password);
                         var users = response.ResultArray;
-                        bool hasUsers = users != null && users.Length > 0;
+                        bool hasUsers = users != null && users.Length >0;
                         UserGroupsListBox.ItemsSource = users;
                         UserGroupsListBox.Visibility = hasUsers ? Visibility.Visible : Visibility.Collapsed;
                         UserGroupsLabel.Text = $"{selectedName}'s users";
@@ -467,6 +536,9 @@ namespace Setup_Application
             }
         }
 
+        /// <summary>
+        /// Handles selection change in the group tree view.
+        /// </summary>
         private void GroupTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             var selectedItem = GroupTreeView.SelectedItem;
@@ -500,11 +572,17 @@ namespace Setup_Application
             }
         }
 
+        /// <summary>
+        /// Handles the event when a permission radio button is checked.
+        /// </summary>
         private void PermissionRadio_Checked(object sender, RoutedEventArgs e)
         {
             SaveBtn.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Handles the Show Permissions button click event.
+        /// </summary>
         private void ShowPermissionsBtn_Click(object sender, RoutedEventArgs e)
         {
             Button_Click(sender, e); // Highlight logic
@@ -550,7 +628,7 @@ namespace Setup_Application
             {
                 PermissionsListBox.ItemsSource = displayList;
                 PermissionsListBox.Visibility = Visibility.Visible;
-                ClosePermissionsBtn.Visibility = Visibility.Visible;
+                //ClosePermissionsBtn.Visibility = Visibility.Visible;
                 DeleteSelectedPermissionBtn.Visibility = Visibility.Visible; // Show delete button
                 ClearAllPermissionsBtn.Visibility = Visibility.Visible; // Show clear all button
             }
@@ -560,14 +638,9 @@ namespace Setup_Application
             }
         }
 
-        private void ClosePermissionsBtn_Click(object sender, RoutedEventArgs e)
-        {
-            PermissionsListBox.Visibility = Visibility.Collapsed;
-            ClosePermissionsBtn.Visibility = Visibility.Collapsed;
-            DeleteSelectedPermissionBtn.Visibility = Visibility.Collapsed;
-            ClearAllPermissionsBtn.Visibility = Visibility.Collapsed;
-        }
-
+        /// <summary>
+        /// Handles the Delete Selected Permission button click event.
+        /// </summary>
         private void DeleteSelectedPermissionBtn_Click(object sender, RoutedEventArgs e)
         {
             if (PermissionsListBox.SelectedItem == null)
@@ -609,6 +682,9 @@ namespace Setup_Application
             ShowPermissionsBtn_Click(null, null); // Refresh list
         }
 
+        /// <summary>
+        /// Handles the Clear All Permissions button click event.
+        /// </summary>
         private void ClearAllPermissionsBtn_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show("Are you sure you want to delete all users and groups?", "Confirm Clear", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -632,6 +708,9 @@ namespace Setup_Application
             }
         }
 
+        /// <summary>
+        /// Handles button click events for highlighting and hiding certain controls.
+        /// </summary>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             SuccessMessageTextBlock.Visibility = Visibility.Collapsed; // Hide success message on any button click
@@ -643,7 +722,7 @@ namespace Setup_Application
             PermissionsListBox.Visibility = Visibility.Visible;
             DeleteSelectedPermissionBtn.Visibility = Visibility.Visible;
             ClearAllPermissionsBtn.Visibility = Visibility.Visible;
-            ClosePermissionsBtn.Visibility = Visibility.Collapsed;
+            //ClosePermissionsBtn.Visibility = Visibility.Collapsed;
 
             if (_lastHighlightedButton != null)
                 _lastHighlightedButton.Tag = null;
@@ -656,11 +735,16 @@ namespace Setup_Application
             }
         }
 
+        /// <summary>
+        /// Handles selection change in the user groups list box.
+        /// </summary>
         private void UserGroupsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (UserGroupsListBox.SelectedItem != null)
             {
-                selectedName = UserGroupsListBox.SelectedItem.ToString();
+                var selected = UserGroupsListBox.SelectedItem.ToString();
+                var usernameOnly = selected.Contains(",") ? selected.Split(',')[0] : selected;
+                selectedName = usernameOnly;
                 // Determine type based on label
                 if (UserGroupsLabel.Text.EndsWith("'s users"))
                     selectedType = "U";
@@ -675,6 +759,15 @@ namespace Setup_Application
                 SaveBtn.Visibility = Visibility.Collapsed;
             }
         }
+
+        //private void ClosePermissionsBtn_Click(object sender, RoutedEventArgs e)
+        //{
+        //    PermissionsListBox.Visibility = Visibility.Collapsed;
+        //    ClosePermissionsBtn.Visibility = Visibility.Collapsed;
+        //    DeleteSelectedPermissionBtn.Visibility = Visibility.Collapsed;
+        //    ClearAllPermissionsBtn.Visibility = Visibility.Collapsed;
+        //}
+
     }
 }
    

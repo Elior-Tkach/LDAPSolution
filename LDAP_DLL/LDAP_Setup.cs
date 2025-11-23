@@ -15,6 +15,10 @@ namespace LDAP_DLL
         }
 
 
+        /// <summary>
+        /// Helper to get the INI file path for LDAP configuration.
+        /// </summary>
+        /// <returns>The full path to the LDAP.ini file.</returns>
         // Helper to get the INI file path
         internal static string GetIniPath()
         {
@@ -23,6 +27,11 @@ namespace LDAP_DLL
             return Path.Combine(dir, "LDAP.ini");
         }
 
+        /// <summary>
+        /// Writes or updates the server data as the header in the INI file if not present.
+        /// </summary>
+        /// <param name="host">The host name or IP address of the LDAP server.</param>
+        /// <returns>A LdapResponse indicating the result of the operation.</returns>
         // Writes server data as the header if not present
         public static LdapResponse RecordLdapServerDetailsSimple(string host)
         {
@@ -48,14 +57,14 @@ namespace LDAP_DLL
                 catch (Exception ex)
                 {
                     response.Success = false;
-                    response.ErrorMessage = $"Failed to resolve host or IPs: {ex.Message}";
+                    response.ErrorMessage = $"Failed to resolve host or IP: {ex.Message}";
                     response.ErrorNumber = 4020; 
                     logger.Error(ex, $"RecordLdapServerDetailsSimple exception: {response.ErrorMessage}");
                     return response;
                 }
 
                 string iniPath = GetIniPath();
-                string newServerLine = $"Server: IPs={ips}, HostName={hostName}";
+                string newServerLine = $"Server: IP= {ips}, HostName={hostName}";
                 if (!File.Exists(iniPath))
                 {
                     var sb = new System.Text.StringBuilder();
@@ -136,6 +145,13 @@ namespace LDAP_DLL
             }
         }
 
+        /// <summary>
+        /// Saves (adds or updates) a user or group entry with the specified permission in the INI file.
+        /// </summary>
+        /// <param name="name">The user or group name.</param>
+        /// <param name="type">The entry type: "U" for user, "G" for group.</param>
+        /// <param name="permissionType">The permission type: "A" for Admin, "O" for Operator.</param>
+        /// <returns>A LdapResponse indicating the result of the operation.</returns>
         // Unified function to save (add or update) a user/group entry
         public static LdapResponse SaveLdapPermission(string name, string type, string permissionType)
         {
@@ -208,6 +224,10 @@ namespace LDAP_DLL
             }
         }
 
+        /// <summary>
+        /// Clears all user and group entries from the INI file, keeping only comments and the server details line.
+        /// </summary>
+        /// <returns>A LdapResponse indicating the result of the operation.</returns>
         // Clear all user and group entries, keeping only comments and the server details line
         public static LdapResponse ClearLdapPermissions()
         {
@@ -255,6 +275,14 @@ namespace LDAP_DLL
             }
         }
 
+        /// <summary>
+        /// Gets user information from LDAP by user name.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="userName">The user name to search for.</param>
+        /// <param name="username">The LDAP username for authentication.</param>
+        /// <param name="password">The LDAP password for authentication.</param>
+        /// <returns>A LdapResponse containing the user information.</returns>
         // LDAP passthrough functions
         public static LdapResponse GetUser(string ldapPath, string userName, string username, string password)
         {
@@ -273,6 +301,14 @@ namespace LDAP_DLL
             return response;
         }
 
+        /// <summary>
+        /// Gets group information from LDAP by group name.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="groupName">The group name to search for.</param>
+        /// <param name="username">The LDAP username for authentication.</param>
+        /// <param name="password">The LDAP password for authentication.</param>
+        /// <returns>A LdapResponse containing the group information.</returns>
         public static LdapResponse GetGroup(string ldapPath, string groupName, string username, string password)
         {
             var response = new LdapResponse();
@@ -290,6 +326,13 @@ namespace LDAP_DLL
             return response;
         }
 
+        /// <summary>
+        /// Gets all groups from LDAP.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="username">The LDAP username for authentication.</param>
+        /// <param name="password">The LDAP password for authentication.</param>
+        /// <returns>A LdapResponse containing all group names.</returns>
         public static LdapResponse GetAllGroups(string ldapPath, string username, string password)
         {
             var response = new LdapResponse();
@@ -307,6 +350,14 @@ namespace LDAP_DLL
             return response;
         }
 
+        /// <summary>
+        /// Gets all users in a specified group from LDAP.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="groupName">The group name to search for.</param>
+        /// <param name="username">The LDAP username for authentication.</param>
+        /// <param name="password">The LDAP password for authentication.</param>
+        /// <returns>A LdapResponse containing all users in the group.</returns>
         public static LdapResponse GetUsersInGroup(string ldapPath, string groupName, string username, string password)
         {
             var response = new LdapResponse();
@@ -324,6 +375,11 @@ namespace LDAP_DLL
             return response;
         }
 
+        /// <summary>
+        /// Tests the connection to the LDAP server by pinging the host.
+        /// </summary>
+        /// <param name="host">The host name or IP address of the LDAP server.</param>
+        /// <returns>A LdapResponse indicating if the connection was successful.</returns>
         public static LdapResponse TestConnection(string host)
         {
             var response = new LdapResponse();
@@ -342,6 +398,13 @@ namespace LDAP_DLL
             return response;
         }
 
+        /// <summary>
+        /// Tests the LDAP credentials by attempting to bind to the server.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="username">The LDAP username for authentication.</param>
+        /// <param name="password">The LDAP password for authentication.</param>
+        /// <returns>A LdapResponse indicating if the credentials are valid.</returns>
         public static LdapResponse TestLdapCredentials(string ldapPath, string username, string password)
         {
             var response = new LdapResponse();
@@ -360,6 +423,14 @@ namespace LDAP_DLL
             return response;
         }
 
+        /// <summary>
+        /// Gets all members (users and groups) of a specified group from LDAP.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="groupName">The group name to search for.</param>
+        /// <param name="username">The LDAP username for authentication.</param>
+        /// <param name="password">The LDAP password for authentication.</param>
+        /// <returns>A LdapResponse containing all members of the group.</returns>
         public static LdapResponse GetAllGroupMembers(string ldapPath, string groupName, string username, string password)
         {
             var response = new LdapResponse();
@@ -394,6 +465,14 @@ namespace LDAP_DLL
             return response;
         }
 
+        /// <summary>
+        /// Gets all groups for a specified user from LDAP.
+        /// </summary>
+        /// <param name="ldapPath">The LDAP path (server address).</param>
+        /// <param name="userName">The user name to search for.</param>
+        /// <param name="username">The LDAP username for authentication.</param>
+        /// <param name="password">The LDAP password for authentication.</param>
+        /// <returns>A LdapResponse containing all groups for the user.</returns>
         public static LdapResponse GetGroupsForUser(string ldapPath, string userName, string username, string password)
         {
             var response = new LdapResponse();
@@ -418,6 +497,10 @@ namespace LDAP_DLL
             return response;
         }
 
+        /// <summary>
+        /// Checks if a server is recorded in the LDAP.ini file.
+        /// </summary>
+        /// <returns>True if a server is recorded; otherwise, false.</returns>
         // Checks if a server is recorded in LDAP.ini
         public static bool IsServerRecorded()
         {
