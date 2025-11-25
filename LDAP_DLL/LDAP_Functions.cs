@@ -109,13 +109,17 @@ namespace LDAP_DLL
             try
             {
                 var groups = new List<string>();
+                // Ensure LDAP path is in correct format
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
                     ldapPath = "LDAP://" + ldapPath;
+                // Connect to LDAP directory with provided credentials
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
+                    // Search for all group objects in LDAP
                     searcher.Filter = "(objectClass=group)";
                     searcher.PropertiesToLoad.Add("sAMAccountName");
+                    // Find all group entries in LDAP
                     foreach (SearchResult result in searcher.FindAll())
                     {
                         if (result.Properties.Contains("sAMAccountName"))
@@ -150,28 +154,37 @@ namespace LDAP_DLL
             try
             {
                 var users = new List<string>();
+                // Ensure LDAP path is in correct format
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
                     ldapPath = "LDAP://" + ldapPath;
+                // Connect to LDAP directory with provided credentials
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
+                    // Search for the group by sAMAccountName
                     searcher.Filter = $"(&(objectClass=group)(sAMAccountName={groupName}))";
                     searcher.PropertiesToLoad.Add("member");
+                    // Find the group entry in LDAP
                     var result = searcher.FindOne();
                     if (result == null)
                     {
+                        // Group not found in directory
                         throw new LdapDirectoryGroupNotFoundException(groupName);
                     }
                     if (result.Properties.Contains("member"))
                     {
                         string serverPath = ldapPath;
+                        // Iterate over each member DN in the group
                         foreach (var memberDn in result.Properties["member"])
                         {
+                            // Open DirectoryEntry for each member (user or group)
                             using (var memberEntry = new DirectoryEntry($"{serverPath}/{memberDn}", username, password))
                             {
-                                var userAccount = memberEntry.Properties["sAMAccountName"].Value as string;
-                                var givenName = memberEntry.Properties["givenName"].Value as string;
-                                var sn = memberEntry.Properties["sn"].Value as string;
+                                // Get user properties from LDAP
+                                var userAccount = memberEntry.Properties["sAMAccountName"].Value as string; // LDAP username
+                                var givenName = memberEntry.Properties["givenName"].Value as string; // LDAP first name
+                                var sn = memberEntry.Properties["sn"].Value as string; // LDAP last name
+                                // Only add if userAccount is not null or empty
                                 if (!string.IsNullOrEmpty(userAccount))
                                     users.Add($"{userAccount},{givenName},{sn}");
                             }
@@ -211,8 +224,10 @@ namespace LDAP_DLL
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
+                    // Search for user by sAMAccountName or displayName
                     searcher.Filter = $"(&(objectClass=user)(|(sAMAccountName=*{userName}*)(displayName=*{userName}*)))";
                     searcher.PropertiesToLoad.Add("memberOf");
+                    // Find the user entry in LDAP
                     var result = searcher.FindOne();
                     if (result == null)
                     {
@@ -220,6 +235,7 @@ namespace LDAP_DLL
                     }
                     if (result.Properties.Contains("memberOf"))
                     {
+                        // Iterate over all group DNs the user is a member of
                         foreach (var groupDn in result.Properties["memberOf"])
                         {
                             var dn = groupDn.ToString();
@@ -274,13 +290,16 @@ namespace LDAP_DLL
             {
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
                     ldapPath = "LDAP://" + ldapPath;
+                // Connect to LDAP directory with provided credentials
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
+                    // Search for users matching the userName in various LDAP fields
                     searcher.Filter = $"(&(objectClass=user)(|(sAMAccountName=*{userName}*)(givenName=*{userName}*)(sn=*{userName}*)(cn=*{userName}*)(displayName=*{userName}*)))";
                     searcher.PropertiesToLoad.Add("sAMAccountName");
                     searcher.PropertiesToLoad.Add("givenName");
                     searcher.PropertiesToLoad.Add("sn");
+                    // Find all matching user entries in LDAP
                     var results = searcher.FindAll();
                     if (results == null || results.Count ==0)
                     {
@@ -289,9 +308,10 @@ namespace LDAP_DLL
                     foreach (SearchResult result in results)
                     {
                         var userEntry = result.GetDirectoryEntry();
-                        var sAMAccountName = GetProperty(userEntry, "sAMAccountName");
-                        var givenName = GetProperty(userEntry, "givenName");
-                        var sn = GetProperty(userEntry, "sn");
+                        // Get user properties from LDAP
+                        var sAMAccountName = GetProperty(userEntry, "sAMAccountName"); // LDAP username
+                        var givenName = GetProperty(userEntry, "givenName"); // LDAP first name
+                        var sn = GetProperty(userEntry, "sn"); // LDAP last name
                         if (!string.IsNullOrEmpty(sAMAccountName))
                         {
                             userInfos.Add($"{sAMAccountName},{givenName},{sn}");
@@ -331,10 +351,12 @@ namespace LDAP_DLL
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
+                    // Search for groups matching sAMAccountName, cn, or name
                     searcher.Filter = $"(&(objectClass=group)(|(sAMAccountName=*{groupName}*)(cn=*{groupName}*)(name=*{groupName}*)))";
                     searcher.PropertiesToLoad.Add("sAMAccountName");
                     searcher.PropertiesToLoad.Add("cn");
                     searcher.PropertiesToLoad.Add("name");
+                    // Find all matching group entries in LDAP
                     var results = searcher.FindAll();
                     if (results == null || results.Count ==0)
                     {
@@ -343,6 +365,7 @@ namespace LDAP_DLL
                     foreach (SearchResult result in results)
                     {
                         var groupEntry = result.GetDirectoryEntry();
+                        // Get group properties from LDAP
                         var sAMAccountName = GetProperty(groupEntry, "sAMAccountName");
                         var cn = GetProperty(groupEntry, "cn");
                         var nameProp = GetProperty(groupEntry, "name");
@@ -387,24 +410,32 @@ namespace LDAP_DLL
             var members = new List<LdapGroupMember>();
             try
             {
+                // Ensure LDAP path is in correct format
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
                     ldapPath = "LDAP://" + ldapPath;
+                // Connect to LDAP directory with provided credentials
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 using (var searcher = new DirectorySearcher(entry))
                 {
+                    // Search for the group by sAMAccountName
                     searcher.Filter = $"(&(objectClass=group)(sAMAccountName={groupName}))";
                     searcher.PropertiesToLoad.Add("member");
+                    // Find the group entry in LDAP
                     var result = searcher.FindOne();
                     if (result == null)
                         throw new LdapDirectoryGroupNotFoundException(groupName);
 
                     if (result.Properties.Contains("member"))
                     {
+                        // Iterate over each member DN in the group
                         foreach (var memberDn in result.Properties["member"])
                         {
+                            // Open DirectoryEntry for each member (user or group)
                             using (var memberEntry = new DirectoryEntry($"{ldapPath}/{memberDn}", username, password))
                             {
+                                // Get objectClass property to determine if user or group
                                 var objectClass = memberEntry.Properties["objectClass"];
+                                // Get sAMAccountName (username) or cn (group name)
                                 var name = memberEntry.Properties["sAMAccountName"].Value as string;
                                 if (string.IsNullOrEmpty(name))
                                     name = memberEntry.Properties["cn"].Value as string;
@@ -412,6 +443,7 @@ namespace LDAP_DLL
                                 string type = "Unknown";
                                 if (objectClass != null)
                                 {
+                                    // Check if member is a user or group
                                     var classes = objectClass.Cast<object>().Select(c => c.ToString()).ToList();
                                     if (classes.Contains("user"))
                                         type = "User";
@@ -421,6 +453,7 @@ namespace LDAP_DLL
 
                                 if (!string.IsNullOrEmpty(name))
                                 {
+                                    // Add member info to the result list
                                     members.Add(new LdapGroupMember { Name = name, Type = type });
                                 }
                             }
@@ -439,6 +472,12 @@ namespace LDAP_DLL
         // -------------------------
         // Helpers
         // -------------------------
+        /// <summary>
+        /// Helper to get a property value from a DirectoryEntry, or empty string if not present.
+        /// </summary>
+        /// <param name="entry">The DirectoryEntry object.</param>
+        /// <param name="propertyName">The property name to retrieve.</param>
+        /// <returns>The property value as a string, or empty string if not found.</returns>
         private static string GetProperty(System.DirectoryServices.DirectoryEntry entry, string propertyName)
         {
             if (entry.Properties.Contains(propertyName) && entry.Properties[propertyName].Count > 0)

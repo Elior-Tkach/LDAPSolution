@@ -22,8 +22,11 @@ namespace LDAP_DLL
         // Helper to get the INI file path
         internal static string GetIniPath()
         {
+            // Get the path of the currently executing assembly (DLL)
             var dllPath = Assembly.GetExecutingAssembly().Location;
+            // Get the directory containing the DLL
             var dir = Path.GetDirectoryName(dllPath);
+            // Return the full path to LDAP.ini in the same directory
             return Path.Combine(dir, "LDAP.ini");
         }
 
@@ -43,6 +46,7 @@ namespace LDAP_DLL
                 string hostName = "N/A";
                 try
                 {
+                    // Resolve the host to get its host name and IPv4 addresses
                     var hostEntry = System.Net.Dns.GetHostEntry(host);
                     hostName = hostEntry.HostName;
                     // Only include IPv4 addresses
@@ -67,6 +71,7 @@ namespace LDAP_DLL
                 string newServerLine = $"Server: IP= {ips}, HostName={hostName}";
                 if (!File.Exists(iniPath))
                 {
+                    // Create a new INI file with server details and headers
                     var sb = new System.Text.StringBuilder();
                     sb.AppendLine("# ======================================================");
                     sb.AppendLine("# LDAP Configuration File");
@@ -91,8 +96,9 @@ namespace LDAP_DLL
                 }
                 else
                 {
+                    // Update the server line if it exists, otherwise do nothing
                     var lines = File.ReadAllLines(iniPath).ToList();
-                    for (int i = 0; i < lines.Count; i++)
+                    for (int i =0; i < lines.Count; i++)
                     {
                         if (lines[i].StartsWith("Server:"))
                         {
@@ -172,6 +178,7 @@ namespace LDAP_DLL
                 {
                     throw new LdapInvalidPermissionTypeException(permissionType);
                 }
+                // Read all lines from the INI file
                 var lines = File.ReadAllLines(iniPath).ToList();
                 bool found = false;
 
@@ -195,6 +202,7 @@ namespace LDAP_DLL
                 }
                 try
                 {
+                    // Write all lines back to the INI file
                     File.WriteAllLines(iniPath, lines);
                 }
                 catch (Exception ex)
@@ -240,11 +248,13 @@ namespace LDAP_DLL
                 {
                     throw new LdapIniFileNotFoundException();
                 }
+                // Keep only comment lines, empty lines, and the server details line
                 var lines = File.ReadAllLines(iniPath)
                     .Where(line => line.Trim().StartsWith("#") || string.IsNullOrWhiteSpace(line) || line.Trim().StartsWith("Server:"))
                     .ToList();
                 try
                 {
+                    // Write the filtered lines back to the INI file
                     File.WriteAllLines(iniPath, lines);
                 }
                 catch (Exception ex)

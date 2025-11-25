@@ -45,12 +45,14 @@ namespace Setup_Application
             this.username = username;
             this.password = password;
 
+            // Register event handlers for UI controls
             UserSelectListBox.SelectionChanged += UserSelectListBox_SelectionChanged;
             OperatorRadio.Checked += PermissionRadio_Checked;
             AdminRadio.Checked += PermissionRadio_Checked;
             GroupTreeView.SelectedItemChanged += GroupTreeView_SelectedItemChanged;
             UserGroupsListBox.SelectionChanged += UserGroupsListBox_SelectionChanged;
 
+            // Initialize timer for hiding success messages
             successMessageTimer = new DispatcherTimer();
             successMessageTimer.Interval = TimeSpan.FromSeconds(3);
             successMessageTimer.Tick += SuccessMessageTimer_Tick;
@@ -258,6 +260,7 @@ namespace Setup_Application
                 var userName = UserNameInputTextBox.Text;
                 if (!string.IsNullOrWhiteSpace(userName))
                 {
+                    // Query LDAP for user info
                     var response = LDAP_Setup.GetUser(host, userName, username, password);
                     if (!string.IsNullOrEmpty(response.ErrorMessage))
                     {
@@ -266,8 +269,9 @@ namespace Setup_Application
                         UserSelectListBox.Visibility = Visibility.Collapsed;
                         return;
                     }
-                    if (response.ResultArray != null && response.ResultArray.Length > 0)
+                    if (response.ResultArray != null && response.ResultArray.Length >0)
                     {
+                        // Populate user selection list from LDAP results
                         UserSelectListBox.ItemsSource = response.ResultArray;
                         UserSelectListBox.Visibility = Visibility.Visible;
                         SelectedTextBox.Visibility = Visibility.Collapsed;
@@ -300,6 +304,7 @@ namespace Setup_Application
                 {
                     if (groupInputMode == GroupInputMode.FindGroup)
                     {
+                        // Query LDAP for group info
                         var response = LDAP_Setup.GetGroup(host, groupName, username, password);
                         if (!string.IsNullOrEmpty(response.ErrorMessage))
                         {
@@ -310,6 +315,7 @@ namespace Setup_Application
                         }
                         if (response.ResultArray != null && response.ResultArray.Length > 0)
                         {
+                            // Populate group selection list from LDAP results
                             UserSelectListBox.ItemsSource = response.ResultArray;
                             UserSelectListBox.Visibility = Visibility.Visible;
                             SelectedTextBox.Visibility = Visibility.Collapsed;
@@ -365,12 +371,13 @@ namespace Setup_Application
                 return;
             }
 
-            // Ensure only the username is saved
+            // Only save the username part (not full display string)
             var usernameToSave = selectedName.Contains(",") ? selectedName.Split(',')[0] : selectedName;
             string permission = OperatorRadio.IsChecked == true ? "O" : "A";
             string iniPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "LDAP.ini");
             if (System.IO.File.Exists(iniPath))
             {
+                // Check for duplicate entry in INI file
                 var lines = System.IO.File.ReadAllLines(iniPath);
                 foreach (var line in lines)
                 {
@@ -394,6 +401,7 @@ namespace Setup_Application
                 }
             }
 
+            // Save the user/group and permission to INI file
             var response = LDAP_Setup.SaveLdapPermission(usernameToSave, selectedType, permission);
 
             if (!string.IsNullOrEmpty(response.ErrorMessage))

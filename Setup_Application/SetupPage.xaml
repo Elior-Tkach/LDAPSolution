@@ -89,9 +89,9 @@
            VerticalAlignment="Top"/>
         <Button Content="Show all users and groups with permission" Style="{StaticResource HighlightableButtonStyle}" Visibility="Collapsed" Width="386" Canvas.Left="444" Canvas.Top="100" Click="ShowPermissionsBtn_Click" Height="40" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Top" Background="LightGreen"/>
         <ListBox x:Name="PermissionsListBox" Width="390" Height="143" Canvas.Left="-99" Canvas.Top="390"  FontSize="16" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <Button x:Name="DeleteSelectedPermissionBtn" Content="Delete Selected" Width="126" Height="28" Canvas.Left="-42" Canvas.Top="538"
+        <Button x:Name="DeleteSelectedPermissionBtn" Content="Remove Selected" Width="126" Height="28" Canvas.Left="-42" Canvas.Top="538"
              Click="DeleteSelectedPermissionBtn_Click" FontSize="16" Background="Orange" HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource HighlightableButtonStyle}"/>
-        <Button x:Name="ClearAllPermissionsBtn" Content="Clear All" Width="127" Height="28" Canvas.Left="96" Canvas.Top="538"
+        <Button x:Name="ClearAllPermissionsBtn" Content="Remove All" Width="127" Height="28" Canvas.Left="96" Canvas.Top="538"
              Click="ClearAllPermissionsBtn_Click" FontSize="16" Background="Red" HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource HighlightableButtonStyle}"/>
         <!--<Button x:Name="ClosePermissionsBtn" Content="X" Width="16" Height="20" Canvas.Left="275" Canvas.Top="390"
           Click="ClosePermissionsBtn_Click" FontSize="16" Background="LightGray" Visibility="Collapsed" Foreground="Red" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="1.6,0.75"/>-->

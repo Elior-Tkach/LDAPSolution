@@ -24,19 +24,23 @@ namespace LDAP_DLL
         // Helper to get LDAP path (host) from INI file header
         private static string GetLdapPathFromIni()
         {
+            // Get the path to the INI file
             string iniPath = LDAP_Setup.GetIniPath();
             if (!File.Exists(iniPath))
                 throw new LdapIniFileNotFoundException();
+            // Read all lines from the INI file
             var lines = File.ReadAllLines(iniPath);
             foreach (var line in lines)
             {
+                // Look for the server line with IP
                 if (line.StartsWith("Server: IP="))
                 {
                     var IPPart = line.Split(',')[0];
                     var IPEq = IPPart.IndexOf("IP=");
-                    if (IPEq >= 0)
+                    if (IPEq >=0)
                     {
-                        return IPPart.Substring(IPEq + 4).Trim();
+                        // Return the IP value from the server line
+                        return IPPart.Substring(IPEq +4).Trim();
                     }
                 }
             }
@@ -52,19 +56,24 @@ namespace LDAP_DLL
         internal static bool IsUserRegistered(string userName, string expectedPermissionType)
         {
             logger.Info($"IsUserRegistered called with userName: {userName}, expectedPermissionType: {expectedPermissionType}");
+            // Get the path to the INI file
             string iniPath = LDAP_Setup.GetIniPath();
             if (!File.Exists(iniPath))
             {
                 throw new LdapIniFileNotFoundException();
             }
+            // Read all lines from the INI file
             var lines = File.ReadAllLines(iniPath);
             bool userFound = false;
             foreach (var line in lines)
             {
+                // Skip comments and server info
                 if (line.StartsWith("#") || line.StartsWith("Server:")) continue;
                 var parts = line.Split(',');
-                if (parts.Length >= 3 && parts[0] == userName && parts[1] == "U")
+                // Check if the line matches the user and type
+                if (parts.Length >=3 && parts[0] == userName && parts[1] == "U")
                 {
+                    // Check if the permission matches
                     if (string.Equals(parts[2], expectedPermissionType, StringComparison.OrdinalIgnoreCase))
                     {
                         logger.Info($"User '{userName}' found with matching permission '{expectedPermissionType}'.");
@@ -94,10 +103,12 @@ namespace LDAP_DLL
         internal static bool IsUserInRegisteredGroup(string userName, string username, string password, string permissionType)
         {
             logger.Info($"IsUserInRegisteredGroup called with userName: {userName}, permissionType: {permissionType}");
+            // Get the LDAP path from the INI file
             string ldapPath = GetLdapPathFromIni();
             string[] userGroups;
             try
             {
+                // Get all groups for the user from LDAP
                 userGroups = LDAP_Functions.GetGroupsForUserArray(ldapPath, userName, username, password);
             }
             catch (LdapFunctionsException ex)
@@ -105,24 +116,29 @@ namespace LDAP_DLL
                 logger.Warn($"Failed to get groups for user '{userName}': {ex.Message}");
                 throw new LdapUserNotInGroupException(userName);
             }
-            if (userGroups == null || userGroups.Length == 0)
+            if (userGroups == null || userGroups.Length ==0)
             {
                 throw new LdapUserNotInGroupException(userName);
             }
+            // Get the path to the INI file
             string iniPath = LDAP_Setup.GetIniPath();
             if (!File.Exists(iniPath))
             {
                 throw new LdapIniFileNotFoundException();
             }
+            // Read all lines from the INI file
             var lines = File.ReadAllLines(iniPath);
             foreach (var group in userGroups)
             {
                 foreach (var line in lines)
                 {
+                    // Skip comments and server info
                     if (line.StartsWith("#") || line.StartsWith("Server:")) continue;
                     var parts = line.Split(',');
-                    if (parts.Length >= 3 && parts[0] == group && parts[1] == "G")
+                    // Check if the line matches the group and type
+                    if (parts.Length >=3 && parts[0] == group && parts[1] == "G")
                     {
+                        // Check if the permission matches
                         if (string.Equals(parts[2], permissionType, StringComparison.OrdinalIgnoreCase))
                         {
                             logger.Info($"User '{userName}' is in group '{group}' with permission '{permissionType}'.");
@@ -152,15 +168,17 @@ namespace LDAP_DLL
             var response = new LdapResponse();
             try
             {
+                // Get the LDAP path from the INI file
                 string ldapPath = GetLdapPathFromIni();
                 if (!ldapPath.StartsWith("LDAP://", StringComparison.OrdinalIgnoreCase))
                     ldapPath = "LDAP://" + ldapPath;
+                // Try to bind to LDAP with the provided credentials
                 using (var entry = new DirectoryEntry(ldapPath, username, password))
                 {
                     // Force authentication by accessing NativeObject
                     var obj = entry.NativeObject;
                 }
-                // Check user permission
+                // Check if the user is registered directly
                 try
                 {
                     if (IsUserRegistered(username, permissionType))
@@ -210,7 +228,7 @@ namespace LDAP_DLL
                         logger.Error(ex2, $"Unexpected error while checking group registration for user '{username}': {ex2.Message}");
                         response.Success = false;
                         response.ErrorMessage = ex2.Message;
-                        response.ErrorNumber = 4020;
+                        response.ErrorNumber =4020;
                         logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                         return response;
                     }
@@ -239,7 +257,7 @@ namespace LDAP_DLL
                 logger.Error(ex, $"AuthenticateUser exception for user '{username}': {ex.Message}");
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
-                response.ErrorNumber = 4020;
+                response.ErrorNumber =4020;
                 logger.Info($"LdapResponse: Success={response.Success}, ErrorNumber={response.ErrorNumber}, ErrorMessage={response.ErrorMessage}, ResultString={response.ResultString}, ResultArray=[{(response.ResultArray != null ? string.Join(", ", response.ResultArray) : "")}]");
                 return response;
             }
