@@ -6,7 +6,7 @@ LDAPSolution is a comprehensive .NET Framework4.8 solution for managing user and
 
 ###1. LDAP_DLL
 A class library (DLL) that encapsulates all the core logic for interacting with an LDAP server. It provides functions to:
-- Add, remove, and query users and groups in LDAP.
+- Query users and groups in LDAP.
 - Authenticate users against the LDAP server.
 - Manage permissions by reading from and writing to a local `LDAP.ini` file, which stores user/group access levels (Admin/Operator).
 - Log all operations and errors using NLog for traceability and troubleshooting.
@@ -14,7 +14,7 @@ A class library (DLL) that encapsulates all the core logic for interacting with 
 ###2. Setup_Application
 A user-friendly WPF desktop application that leverages the DLL to provide a graphical interface for administrators. With this application, you can:
 - Connect to an LDAP server by specifying its IP address or host name.
-- Search for users and groups, view their details, and manage their membership.
+- Search for users and groups and view their details.
 - Assign or modify permissions for users and groups, which are persisted in the `LDAP.ini` file.
 - View, add, or remove permissions, and see a hierarchical view of groups and their members.
 - All changes and actions are logged for auditing purposes.
@@ -23,7 +23,6 @@ The solution is designed for easy deployment: simply place the required DLLs, th
 
 ## Features
 
-- Add, remove, and manage users and groups via LDAP.
 - Assign permissions (Admin/Operator) to users and groups.
 - Authenticate users using LDAP.
 - All configuration is stored in `LDAP.ini`.
@@ -54,7 +53,7 @@ The solution is designed for easy deployment: simply place the required DLLs, th
 
 ## Project Structure
 
-- `LDAP_DLL`: Contains core LDAP and authentication logic.
+- `LDAP_DLL`: Contains core LDAP functions, setup and authentication logic.
 - `Setup_Application`: WPF UI for setup and management.
 - `Test_Authentication`: (Optional) Project for testing authentication features.
 
