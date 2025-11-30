@@ -49,6 +49,10 @@ namespace LDAP_DLL
                     // Resolve the host to get its host name and IPv4 addresses
                     var hostEntry = System.Net.Dns.GetHostEntry(host);
                     hostName = hostEntry.HostName;
+
+                    var allAddresses = hostEntry.AddressList.Select(a => a.ToString()).ToArray();
+                    logger.Info("All resolved addresses: " + string.Join(", ", allAddresses));
+
                     // Only include IPv4 addresses
                     var ipv4Addresses = hostEntry.AddressList
                         .Where(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
