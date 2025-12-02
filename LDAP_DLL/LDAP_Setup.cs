@@ -58,17 +58,21 @@ namespace LDAP_DLL
                         .Where(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                         .Select(a => a.ToString())
                         .ToArray();
-                    ips = ipv4Addresses.Length > 0
-                        ? string.Join(", ", ipv4Addresses)
-                        : "N/A";
+                    if (ipv4Addresses.Length >0)
+                    {
+                        ips = string.Join(", ", ipv4Addresses);
+                    }
+                    else
+                    {
+                        logger.Warn("No IPv4 addresses resolved for host, using original host string in INI file.");
+                        ips = host; // fallback to original host string
+                    }
                 }
                 catch (Exception ex)
                 {
-                    response.Success = false;
-                    response.ErrorMessage = $"Failed to resolve host or IP: {ex.Message}";
-                    response.ErrorNumber = 4020; 
-                    logger.Error(ex, $"RecordLdapServerDetailsSimple exception: {response.ErrorMessage}");
-                    return response;
+                    logger.Warn("Dns.GetHostEntry failed, using original host string in INI file. Exception: " + ex.Message);
+                    ips = host; // fallback to original host string
+                    hostName = host;
                 }
 
                 string iniPath = GetIniPath();
